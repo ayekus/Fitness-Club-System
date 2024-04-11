@@ -22,7 +22,7 @@ CREATE TABLE Trainers (
     date_of_birth DATE
 )
 
-CREATE TABLE Administration (
+CREATE TABLE Admin (
     trainer_id SERIAL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
