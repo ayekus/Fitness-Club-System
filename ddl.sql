@@ -10,6 +10,9 @@ CREATE TABLE Members (
     weight DECIMAL(5, 2),
     fitness_goal VARCHAR(255)
     join_date DATE DEFAULT CURRENT_DATE
+    exercise_routines VARCHAR(255),
+    fitness_achievements VARCHAR(255),
+    health_stats VARCHAR(255)
 );
 
 CREATE TABLE Trainers (
