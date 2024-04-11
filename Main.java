@@ -1,19 +1,19 @@
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class Main {
-    // Database connection details
-    private final String url = "jdbc:postgresql://localhost:5432/database_name";
-    private final String user = "username";
-    private final String password = "password";
+    public static void main(String[] args) throws IOException, SQLException {
+        String configFilePath = "config.properties";
+        FileInputStream propsInput = new FileInputStream(configFilePath);
 
-    public static void main(String[] args) {
-        Main database = new Main();
+        Properties prop = new Properties();
+        prop.load(propsInput);
 
-        try (Connection conn = DriverManager.getConnection(database.url, database.user, database.password)) {
-             System.out.println("Connected");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }}
+        Connection conn = DriverManager.getConnection(prop.getProperty("DB_URL"), prop.getProperty("DB_USER"), prop.getProperty("DB_PASSWORD"));
+        System.out.println("Connected");
+    }
 }
