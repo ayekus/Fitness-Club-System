@@ -1,6 +1,8 @@
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -130,22 +132,52 @@ public class Main {
     }
 
     public static void register(Connection conn, Scanner scanner) {
-        System.out.print("Enter email: ");
+        System.out.print("Enter Email: ");
         String email = scanner.nextLine();
-        System.out.print("Enter password: ");
+
+        if (!email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
+            System.out.print("Invalid Email format, please try again: ");
+            email = scanner.nextLine();
+
+            if (!email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
+                System.out.println("Invalid Email format.");
+                return;
+            }
+        }
+
+        System.out.print("Enter Password: ");
         String password = scanner.nextLine();
 
         System.out.print("Enter First Name: ");
         String firstName = scanner.nextLine();
 
-        System.out.print("Enter First Name: ");
+        System.out.print("Enter Last Name: ");
         String lastName = scanner.nextLine();
 
         System.out.print("Enter Phone Number: ");
         String phoneNumber = scanner.nextLine();
 
-        System.out.print("Enter Date of Birth: ");
+        if (!phoneNumber.matches("^\\d{3}-\\d{3}-\\d{4}$")) {
+            System.out.print("Invalid Phone Number, please try again: ");
+            phoneNumber = scanner.nextLine();
+
+            if (!phoneNumber.matches("^\\d{3}-\\d{3}-\\d{4}$")) {
+                System.out.println("Invalid Phone Number.");
+                return;
+            }
+        }
+
+        System.out.print("Enter Date of Birth (yyyy-mm-dd): ");
         String dob = scanner.nextLine();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date dobDate = null;
+        try {
+            dobDate = new Date(sdf.parse(dob).getTime());
+        } catch (ParseException e) {
+            System.out.println("Invalid Date of Birth format. Please enter date in yyyy-mm-dd format.");
+            return;
+        }
 
         System.out.print("Enter Height: ");
         String height = scanner.nextLine();
@@ -157,14 +189,14 @@ public class Main {
         String fitnessGoals = scanner.nextLine();
 
         try {
-            String sql = "INSERT INTO Members (first_name, lastName, email, password, phone, date_of_birth, height, weight, fitness_goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO Members (first_name, last_name, email, password, phone, date_of_birth, height, weight, fitness_goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, firstName);
             stmt.setString(2, lastName);
             stmt.setString(3, email);
             stmt.setString(4, password);
             stmt.setString(5, phoneNumber);
-            stmt.setString(6, dob);
+            stmt.setDate(6, dobDate);
             try {
                 stmt.setDouble(7, Double.parseDouble(height));
                 stmt.setDouble(8, Double.parseDouble(weight));
