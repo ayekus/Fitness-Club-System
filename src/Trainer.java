@@ -13,8 +13,7 @@ public class Trainer {
                            1. Set Availability
                            2. Show Schedule
                            3. View Member Profile
-                           4. Billing and Payment Processing
-                           5. Leave System""");
+                           4. Leave System""");
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine();

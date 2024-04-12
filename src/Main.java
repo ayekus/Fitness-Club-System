@@ -15,6 +15,8 @@ public class Main {
         Connection conn = DriverManager.getConnection(prop.getProperty("DB_URL"), prop.getProperty("DB_USER"), prop.getProperty("DB_PASSWORD"));
         System.out.println("Connected\n");
 
+        prop.clear();
+
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
