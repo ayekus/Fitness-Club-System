@@ -13,17 +13,19 @@ public class Main {
         prop.load(propsInput);
 
         Connection conn = DriverManager.getConnection(prop.getProperty("DB_URL"), prop.getProperty("DB_USER"), prop.getProperty("DB_PASSWORD"));
-        System.out.println("Connected");
+        System.out.println("Connected\n");
 
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
-            System.out.println("Welcome to the Fitness Club");
-            System.out.println("1. Existing Member Sign-In");
-            System.out.println("2. Trainer Sign-in");
-            System.out.println("3. Admin Sign-in");
-            System.out.println("4. Register new member");
-            System.out.println("5. Exit");
+            System.out.println("""
+                    Welcome to the Fitness Club
+                    Please select an option:
+                       1. Existing Member Sign-In
+                       2. Trainer Sign-in
+                       3. Admin Sign-in
+                       4. Register new member
+                       5. Exit""");
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine();
@@ -42,6 +44,8 @@ public class Main {
                     register(conn, scanner);
                     break;
                 case "5":
+                    conn.close();
+                    scanner.close();
                     System.exit(0);
                 default:
                     System.out.print("Invalid choice, ");
@@ -89,7 +93,7 @@ public class Main {
 
         if (rs.next()) {
             System.out.println("Logging in.\nWelcome Trainer " + rs.getString("first_name"));
-            // Call something in trainer using rs.getInt("trainer_id") as init trainer id.
+            Trainer.main(rs.getInt("trainer_id"), conn, scanner);
         } else {
             System.out.print("Invalid email and password combination, ");
             return;
@@ -113,7 +117,7 @@ public class Main {
 
         if (rs.next()) {
             System.out.println("Logging in.\nWelcome Admin " + rs.getString("first_name"));
-            // Call something in admin using rs.getInt("admin_id") as init admin id.
+            Admin.main(rs.getInt("admin_id"), conn, scanner);
         } else {
             System.out.print("Invalid email and password combination, ");
             return;
@@ -168,7 +172,7 @@ public class Main {
             }
             stmt.setString(9, fitnessGoals);
             stmt.executeUpdate();
-            System.out.println("New member registered successfully!");
+            System.out.println("You have registered successfully!");
 
             // Login to user
         } catch (SQLException e) {
