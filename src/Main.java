@@ -1,9 +1,6 @@
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 import java.util.Scanner;
 
@@ -26,67 +23,131 @@ public class Main {
             System.out.println("2. Trainer Sign-in");
             System.out.println("3. Admin Sign-in");
             System.out.println("4. Register new member");
-            System.out.println("Enter your choice: ");
+            System.out.println("5. Exit");
+            System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine();
 
-            System.out.println("Enter email: ");
-            String email = scanner.nextLine();
-            System.out.println("Enter password: ");
-            String password = scanner.nextLine();
-
             switch (choice) {
                 case "1":
-                    memberSignIn(conn, scanner, email, password);
+                    memberSignIn(conn, scanner);
                     break;
                 case "2":
-                    trainerSignIn(conn, scanner, email, password);
+                    trainerSignIn(conn, scanner);
                     break;
                 case "3":
-                    adminSignIn(conn, scanner, email, password);
+                    adminSignIn(conn, scanner);
                     break;
                 case "4":
-                    register(conn, scanner, email, password);
+                    register(conn, scanner);
                     break;
+                case "5":
+                    System.exit(0);
                 default:
-                    System.out.println("Invalid choice\n");
+                    System.out.print("Invalid choice, ");
                     break;
             }
+            System.out.println("please try again.\n");
         }
     }
 
-    public static void memberSignIn(Connection conn, Scanner scanner, String email, String password) {
-        // Implement member sign-in logic
+    public static void memberSignIn(Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        PreparedStatement stmt = conn.prepareStatement("SELECT member_id, first_name FROM Members WHERE email = ? AND password = ?");
+        stmt.setString(1, email);
+        stmt.setString(2, password);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            System.out.println("Logging in.\nWelcome " + rs.getString("first_name"));
+            // Call something in member using rs.getInt("member_id") as init member id.
+        } else {
+            System.out.print("Invalid email and password combination, ");
+            return;
+        }
+
+        rs.close();
+        stmt.close();
     }
 
-    public static void trainerSignIn(Connection conn, Scanner scanner, String email, String password) {
-        // Implement trainer sign-in logic
+    public static void trainerSignIn(Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        PreparedStatement stmt = conn.prepareStatement("SELECT trainer_id, first_name FROM Trainers WHERE email = ? AND password = ?");
+        stmt.setString(1, email);
+        stmt.setString(2, password);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            System.out.println("Logging in.\nWelcome Trainer " + rs.getString("first_name"));
+            // Call something in trainer using rs.getInt("trainer_id") as init trainer id.
+        } else {
+            System.out.print("Invalid email and password combination, ");
+            return;
+        }
+
+        rs.close();
+        stmt.close();
     }
 
-    public static void adminSignIn(Connection conn, Scanner scanner, String email, String password) {
-        // Implement admin sign-in logic
+    public static void adminSignIn(Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        PreparedStatement stmt = conn.prepareStatement("SELECT admin_id, first_name FROM Admin WHERE email = ? AND password = ?");
+        stmt.setString(1, email);
+        stmt.setString(2, password);
+
+        ResultSet rs = stmt.executeQuery();
+
+        if (rs.next()) {
+            System.out.println("Logging in.\nWelcome Admin " + rs.getString("first_name"));
+            // Call something in admin using rs.getInt("admin_id") as init admin id.
+        } else {
+            System.out.print("Invalid email and password combination, ");
+            return;
+        }
+
+        rs.close();
+        stmt.close();
     }
 
-    public static void register(Connection conn, Scanner scanner, String email, String password) {
-        System.out.println("Enter First Name: ");
+    public static void register(Connection conn, Scanner scanner) {
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        System.out.print("Enter First Name: ");
         String firstName = scanner.nextLine();
 
-        System.out.println("Enter First Name: ");
+        System.out.print("Enter First Name: ");
         String lastName = scanner.nextLine();
 
-        System.out.println("Enter Phone Number: ");
+        System.out.print("Enter Phone Number: ");
         String phoneNumber = scanner.nextLine();
 
-        System.out.println("Enter Date of Birth: ");
+        System.out.print("Enter Date of Birth: ");
         String dob = scanner.nextLine();
 
-        System.out.println("Enter Height: ");
+        System.out.print("Enter Height: ");
         String height = scanner.nextLine();
 
-        System.out.println("Enter Weight: ");
+        System.out.print("Enter Weight: ");
         String weight = scanner.nextLine();
 
-        System.out.println("Enter Fitness Goals: ");
+        System.out.print("Enter Fitness Goals: ");
         String fitnessGoals = scanner.nextLine();
 
         try {
@@ -98,11 +159,18 @@ public class Main {
             stmt.setString(4, password);
             stmt.setString(5, phoneNumber);
             stmt.setString(6, dob);
-            stmt.setDouble(7, Double.parseDouble(height));
-            stmt.setDouble(8, Double.parseDouble(weight));
+            try {
+                stmt.setDouble(7, Double.parseDouble(height));
+                stmt.setDouble(8, Double.parseDouble(weight));
+            } catch (NumberFormatException e) {
+                System.out.print("Enter a valid number for height and weight, ");
+                return;
+            }
             stmt.setString(9, fitnessGoals);
             stmt.executeUpdate();
             System.out.println("New member registered successfully!");
+
+            // Login to user
         } catch (SQLException e) {
             System.out.println("Error registering new member: " + e.getMessage());
         }
