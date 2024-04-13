@@ -177,60 +177,20 @@ public class Member {
         viewProfile(memberId, conn, scanner);
     }
 
-    private Connection conn;
-
-    public static String getExerciseRoutines(Integer memberId, Connection conn) {
-        String sql = "SELECT exercise_routines FROM members WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, memberId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("exercise_routines");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error fetching exercise routines: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public static String getFitnessAchievements(Integer memberId, Connection conn) {
-        String sql = "SELECT fitness_achievements FROM members WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, memberId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("fitness_achievements");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error fetching fitness achievements: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public static String getHealthStats(Integer memberId, Connection conn) {
-        String sql = "SELECT health_stats FROM members WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, memberId);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("health_stats");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error fetching health statistics: " + e.getMessage());
-        }
-        return null;
-    }
-
-
     public static void displayDashboard(Integer memberId, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Dashboard:");
         String[] info = new String[3];
-        info[0] = getExerciseRoutines(memberId, conn);
-        info[1] = getFitnessAchievements(memberId, conn);
-        info[2] = getHealthStats(memberId, conn);
+
+        String sql = "SELECT exercise_routines, fitness_achievements, health_stats FROM members WHERE member_id = ?";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, memberId);
+
+        ResultSet rs = pstmt.executeQuery();
+        if (rs.next()) {
+            info[0] = rs.getString("exercise_routines");
+            info[1] = rs.getString("fitness_achievements");
+            info[2] = rs.getString("health_stats");
+        }
 
         if (info[0] == null) {
             System.out.println("No exercise routines found.");
