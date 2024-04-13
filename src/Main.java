@@ -190,7 +190,7 @@ public class Main {
 
         try {
             String sql = "INSERT INTO Members (first_name, last_name, email, password, phone, date_of_birth, height, weight, fitness_goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, firstName);
             stmt.setString(2, lastName);
             stmt.setString(3, email);
@@ -204,28 +204,59 @@ public class Main {
                 System.out.print("Enter a valid number for height and weight, ");
                 return;
             }
-
             stmt.setString(9, fitnessGoals);
             stmt.executeUpdate();
-            System.out.println("You have registered successfully!");
 
+            int memberId = -1;
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                memberId = generatedKeys.getInt(1);
+            }
+
+            generatedKeys.close();
             stmt.close();
 
-            PreparedStatement pstmt = conn.prepareStatement("SELECT member_id FROM Members WHERE email = ? AND password = ?");
-            pstmt.setString(1, email);
-            pstmt.setString(2, password);
+            if (memberId == -1) {
+                System.out.println("Error registering, please try again.");
+                return;
+            }
 
-            ResultSet rs = pstmt.executeQuery();
+            generatedKeys.close();
+            stmt.close();
 
-            System.out.println("Logging in.\nWelcome " + firstName + "\n");
-            Member.main(rs.getInt("member_id"), conn, scanner);
+            System.out.println("You have registered successfully!");
 
-            rs.close();
-            pstmt.close();
+            if (!processPayment(conn, scanner, 5, memberId, "Registration Fee")) {
+                System.out.println("Payment failed. Please try again. ");
+                return;
+            }
+
+            System.out.println("\nLogging in.\nWelcome " + firstName + "\n");
+            Member.main(memberId, conn, scanner);
 
         } catch (SQLException e) {
             System.out.println("Error registering new member: " + e.getMessage());
         }
+    }
+
+    public static boolean processPayment(Connection conn, Scanner scanner, Integer amount, Integer memberId, String description) throws SQLException {
+        System.out.print("You will be charged $" + amount + ", do you consent? (y/n): ");
+        String consent = scanner.nextLine().trim();
+        if (consent.equals("y") || consent.equals("yes")) {
+
+            String query = "INSERT INTO Payments (member_id, amount, payment_desc) VALUES (?, ?, ?)";
+
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, memberId);
+            stmt.setInt(2, amount);
+            stmt.setString(3, description);
+            stmt.executeUpdate();
+
+            System.out.println("Payment successful and sent for Admin processing.");
+            return true;
+        }
+
+        return false;
     }
 
 }

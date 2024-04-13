@@ -59,49 +59,53 @@ public class Member {
         System.out.println("One-on-One Sessions:");
         boolean enrolled = false;
 
-        if (!rs.next()) {
-            System.out.println("You are not enrolled in any upcoming One-on-One Sessions.");
-        }
         while (rs.next()) {
             enrolled = true;
             System.out.println(rs.getString("session_name") + " session on " +
                     rs.getDate("session_date") + " from " + rs.getTime("start_time") + " to "
                     + rs.getTime("end_time") + " with Trainer " +
                     rs.getString("trainer_first_name") + " "
-                    + rs.getString("trainer_last_name") + "\n");
+                    + rs.getString("trainer_last_name"));
         }
+
+        if (!enrolled) {
+            System.out.println("You are not enrolled in any upcoming One-on-One Sessions.");
+        }
+
 
         stmt.close();
         rs.close();
 
         query = ("""
-                SELECT gs.session_name, gs.session_date, gs.start_time, gs.end_time, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
-                FROM GroupSession gs
-                INNER JOIN GroupSessionEnrollment ge ON gs.session_id = ge.session_id
-                INNER JOIN Trainers t ON gs.trainer_id = t.trainer_id
-                WHERE ge.member_id = ?""");
-        stmt = conn.prepareStatement(query);
-        stmt.setInt(1, memberId);
-        rs = stmt.executeQuery();
+            SELECT gs.*, t.first_name as trainer_first_name, t.last_name as trainer_last_name
+            FROM GroupSession gs
+            JOIN GroupSessionEnrollment gse ON gs.session_id = gse.session_id
+            JOIN Trainers t ON gs.trainer_id = t.trainer_id
+            WHERE gse.member_id = ?""");
+
+        PreparedStatement stmt2 = conn.prepareStatement(query);
+        stmt2.setInt(1, memberId);
+        ResultSet rs2 = stmt2.executeQuery();
 
         System.out.println("\nGroup Sessions:");
-        if (!rs.next()) {
+        enrolled = false;
+        while (rs2.next()) {
+            enrolled = true;
+            System.out.println(rs2.getString("session_name") + " session on " +
+                    rs2.getDate("session_date") + " from " + rs2.getTime("start_time") + " to "
+                    + rs2.getTime("end_time") + " with Trainer " +
+                    rs2.getString("trainer_first_name") + " "
+                    + rs2.getString("trainer_last_name"));
+        }
+        if (!enrolled) {
             System.out.println("You are not enrolled in any upcoming Group Sessions.\n");
-            enrolled = false;
-        }
-        while (rs.next()) {
-            enrolled = false;
-            System.out.println(rs.getString("session_name") + " session on " +
-                    rs.getDate("session_date") + " from " + rs.getTime("start_time") + " to "
-                    + rs.getTime("end_time") + " with Trainer " +
-                    rs.getString("trainer_first_name") + " "
-                    + rs.getString("trainer_last_name") + "\n");
         }
 
-        rs.close();
-        stmt.close();
+        rs2.close();
+        stmt2.close();
 
-        System.out.print("Would you like to add or remove a session (y/n): ");
+
+        System.out.print("\nWould you like to add or remove a session (y/n): ");
         String choice = scanner.nextLine().trim().toLowerCase();
 
         if (choice.equals("y") || choice.equals("yes")) {
@@ -278,6 +282,8 @@ public class Member {
 
             insertTrainingSessionStmt.executeUpdate();
             System.out.println("Session successfully booked.");
+
+            viewSchedule(memberId, conn, scanner);
             return;
         }
 
@@ -330,6 +336,7 @@ public class Member {
 
         enrollGroupSessionStmt.executeUpdate();
         System.out.println("Session successfully booked.");
+        viewSchedule(memberId, conn, scanner);
     }
 
     public static void removeSession(Integer memberId, Connection conn, Scanner scanner) throws SQLException {

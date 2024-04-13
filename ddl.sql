@@ -86,9 +86,9 @@ CREATE TABLE GroupSessionEnrollment (
 CREATE TABLE Payments (
     payment_id SERIAL PRIMARY KEY,
     member_id INTEGER NOT NULL,
-    payment_date DATE NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
     payment_desc VARCHAR(255),
+    payment_date DATE DEFAULT CURRENT_DATE,
     FOREIGN KEY (member_id) REFERENCES Members(member_id)
 );
 
