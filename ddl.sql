@@ -41,3 +41,35 @@ CREATE TABLE EquipmentMaintenance (
     date_added DATE DEFAULT CURRENT_DATE,
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
+
+CREATE TABLE TrainingSession (
+    session_id SERIAL PRIMARY KEY,
+    member_id INTEGER NOT NULL,
+    trainer_id INTEGER NOT NULL,
+    session_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    session_name VARCHAR(255) NOT NULL,
+    FOREIGN KEY (member_id) REFERENCES Members(member_id),
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
+    );
+
+CREATE TABLE GroupSession (
+    session_id SERIAL PRIMARY KEY,
+    session_name VARCHAR(255) NOT NULL,
+    session_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    max_participants INTEGER,
+    trainer_id INTEGER NOT NULL,
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
+);
+
+CREATE TABLE GroupSessionEnrollment (
+    enrollment_id SERIAL PRIMARY KEY,
+    session_id INTEGER NOT NULL,
+    member_id INTEGER NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES GroupSession(session_id),
+    FOREIGN KEY (member_id) REFERENCES Members(member_id)
+);
+
