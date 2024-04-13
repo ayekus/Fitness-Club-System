@@ -7,7 +7,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws IOException, SQLException {
+    public static void main(String[] args) throws IOException, SQLException, ParseException {
         String configFilePath = "config.properties";
         FileInputStream propsInput = new FileInputStream(configFilePath);
 
@@ -59,7 +59,7 @@ public class Main {
         }
     }
 
-    public static void memberSignIn(Connection conn, Scanner scanner) throws SQLException {
+    public static void memberSignIn(Connection conn, Scanner scanner) throws SQLException, ParseException {
         System.out.print("Enter email: ");
         String email = scanner.nextLine();
         System.out.print("Enter password: ");
@@ -131,7 +131,7 @@ public class Main {
         stmt.close();
     }
 
-    public static void register(Connection conn, Scanner scanner) {
+    public static void register(Connection conn, Scanner scanner) throws ParseException {
         System.out.print("Enter Email: ");
         String email = scanner.nextLine();
 

@@ -8,25 +8,28 @@ import java.util.Scanner;
 
 public class Member {
 
-    public static void main(int memberId, Connection conn, Scanner scanner) throws SQLException {
+    public static void main(int memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
         while(true) {
             System.out.println("""
                         Please select an option:
-                           1. Update Profile
+                           1. View Profile
                            2. Display Dashboard
-                           3. Leave System""");
+                           3. Schedule Management
+                           4. Leave System""");
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine();
 
             switch (choice) {
                 case "1":
-                    updateProfile(memberId, conn, scanner);
+                    viewProfile(memberId, conn, scanner);
                     break;
                 case "2":
                     displayDashboard(memberId, conn, scanner);
                     break;
                 case "3":
+                    break;
+                case "4":
                     System.out.println("Exiting");
                     conn.close();
                     scanner.close();
@@ -38,74 +41,103 @@ public class Member {
         }
     }
 
-    public static void updateProfile(Integer memberId, Connection conn, Scanner scanner) throws SQLException {
+    public static void viewProfile(Integer memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
+        String[] profile = new String[9];
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Members WHERE member_id = ?");
+        stmt.setInt(1, memberId);
+
+        ResultSet rs = stmt.executeQuery();
+        rs.next();
+
+        System.out.println("Here is your information: ");
+
+        for (int i = 0; i < 8; i++) {
+            System.out.println(rs.getString(i + 2));
+            if (i != 5) {
+                profile[i] = rs.getString(i + 2);
+                continue;
+            }
+            profile[i] = rs.getDate(i + 2).toString();
+        }
+
+        rs.close();
+        stmt.close();
+
+        System.out.println("Would you like to update your information (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        if (choice.equals("y") || choice.equals("yes")) {
+            updateProfile(memberId, conn, scanner, profile);
+            return;
+        }
+
+        System.out.println("Returning back to main menu.\n");
+    }
+
+    public static void updateProfile(Integer memberId, Connection conn, Scanner scanner, String[] profile) throws SQLException, ParseException {
         System.out.println("""
                         What would you like to update today?
                            1. First Name
                            2. Last Name
                            3. Email
-                           4. Phone
-                           5. Date of Birth
-                           6. Height
-                           7. Weight
-                           8. Fitness Goal""");
+                           4. Password
+                           5. Phone
+                           6. Date of Birth
+                           7. Height
+                           8. Weight
+                           9. Fitness Goal""");
         System.out.print("Enter your choice or multiple choices separated by commas (e.g., 6, 7 for height and weight): ");
 
         String choices = scanner.nextLine();
         String[] updates = choices.split(",");
-        String[] newProfile = new String[8];
-
-        for (int i = 0; i < 9; i++) {
-            if (!choices.contains(i + "")) {
-//                newProfile[i] = get original value
-            }
-        }
-
         java.sql.Date dobDate = null;
 
         for (String update : updates) {
             int val = Integer.parseInt(update.trim());
             switch (val) {
                 case 1:
-                    System.out.println("Enter new first name:");
-                    newProfile[val - 1] = scanner.nextLine();
+                    System.out.print("Enter new first name:");
+                    profile[val - 1] = scanner.nextLine();
                     break;
                 case 2:
-                    System.out.println("Enter new last name:");
-                    newProfile[val - 1] = scanner.nextLine();
+                    System.out.print("Enter new last name:");
+                    profile[val - 1] = scanner.nextLine();
                     break;
                 case 3:
-                    System.out.println("Enter new email:");
-                    newProfile[val - 1] = scanner.nextLine();
+                    System.out.print("Enter new email:");
+                    profile[val - 1] = scanner.nextLine();
                     break;
                 case 4:
-                    System.out.println("Enter new phone:");
-                    newProfile[val - 1] = scanner.nextLine();
+                    System.out.print("Enter new password:");
+                    profile[val - 1] = scanner.nextLine();
                     break;
                 case 5:
+                    System.out.println("Enter new phone:");
+                    profile[val - 1] = scanner.nextLine();
+                    break;
+                case 6:
                     System.out.println("Enter new date of birth (yyyy-mm-dd):");
-                    newProfile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine();
 
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     try {
-                        dobDate = new Date(sdf.parse(newProfile[val - 1].trim()).getTime());
+                        dobDate = new Date(sdf.parse(profile[val - 1].trim()).getTime());
                     } catch (ParseException e) {
                         System.out.println("Invalid Date of Birth format. Please try again later.");
                         return;
                     }
-
-                    break;
-                case 6:
-                    System.out.println("Enter new height:");
-                    newProfile[val - 1] = scanner.nextLine();
                     break;
                 case 7:
-                    System.out.println("Enter new weight:");
-                    newProfile[val - 1] = scanner.nextLine();
+                    System.out.println("Enter new height:");
+                    profile[val - 1] = scanner.nextLine();
                     break;
                 case 8:
+                    System.out.println("Enter new weight:");
+                    profile[val - 1] = scanner.nextLine();
+                    break;
+                case 9:
                     System.out.println("Enter new fitness goal:");
-                    newProfile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine();
                     break;
                 default:
                     System.out.println(val + " is an invalid choice.");
@@ -115,29 +147,34 @@ public class Member {
 
         if (dobDate == null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-                // this is from database so cannot be bad format
-                // ** need to change when getting values **
-                dobDate = new Date(sdf.parse(newProfile[6].trim()).getTime());
-            } catch (ParseException e) {
-            }
+            dobDate = new Date(sdf.parse(profile[5].trim()).getTime());
         }
 
-        String SQL = "UPDATE members SET first_name = ?, last_name = ?, email = ?, phone = ?, date_of_birth = ?, height = ?, weight = ?, fitness_goal = ? WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(SQL)) {
-            pstmt.setString(1, newProfile[0]);
-            pstmt.setString(2, newProfile[1]);
-            pstmt.setString(3, newProfile[2]);
-            pstmt.setString(4, newProfile[3]);
-            pstmt.setDate(5, dobDate);
-            pstmt.setDouble(6, Double.parseDouble(newProfile[5]));
-            pstmt.setDouble(7, Double.parseDouble(newProfile[6]));
-            pstmt.setString(8, newProfile[7]);
-            pstmt.setInt(9, memberId);
+        String SQL = "UPDATE members SET first_name = ?, last_name = ?, email = ?, password = ?, phone = ?, date_of_birth = ?, height = ?, weight = ?, fitness_goal = ? WHERE member_id = ?";
+        PreparedStatement pstmt = conn.prepareStatement(SQL);
+        pstmt.setString(1, profile[0]);
+        pstmt.setString(2, profile[1]);
+        pstmt.setString(3, profile[2]);
+        pstmt.setString(4, profile[3]);
+        pstmt.setString(5, profile[4]);
+        pstmt.setDate(6, dobDate);
 
-            pstmt.executeUpdate();
-            System.out.println("Profile updated successfully!");
+        try {
+            pstmt.setDouble(7, Double.parseDouble(profile[6]));
+            pstmt.setDouble(8, Double.parseDouble(profile[7]));
+        } catch (NumberFormatException e) {
+            System.out.print("Enter a valid number for height and weight, please try again. ");
+            viewProfile(memberId, conn, scanner);
+            return;
         }
+
+        pstmt.setString(9, profile[8]);
+        pstmt.setInt(10, memberId);
+
+        pstmt.executeUpdate();
+        System.out.println("Profile updated successfully!\n");
+
+        viewProfile(memberId, conn, scanner);
     }
 
     private Connection conn;
