@@ -46,6 +46,7 @@ public class Admin {
     }
 
     private static void monitorEquipment(int adminId, Connection conn, Scanner scanner) {
+
     }
 
     private static void updateSchedule(int adminId, Connection conn, Scanner scanner) {

@@ -33,3 +33,11 @@ CREATE TABLE Admin (
     phone VARCHAR(20) UNIQUE,
     date_of_birth DATE
 );
+
+CREATE TABLE EquipmentMaintenance (
+    maintenance_id SERIAL PRIMARY KEY,
+    equipment_name VARCHAR(255) NOT NULL,
+    admin_id INT NOT NULL,
+    date_added DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
+);
