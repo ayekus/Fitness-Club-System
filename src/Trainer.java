@@ -1,4 +1,6 @@
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Scanner;
@@ -59,21 +61,37 @@ public class Trainer {
 //        }
     }
 
-    public static void viewMemberProfile(Connection conn, Scanner scanner) {
-        System.out.println("Enter member name to view profile:");
-        String memberName = scanner.nextLine();
+    public static void viewMemberProfile(Connection conn, Scanner scanner) throws SQLException {
+        System.out.println("Enter member first name (case sensitive):");
+        String firstName = scanner.nextLine();
 
-        System.out.println("Looking up profile for member: " + memberName);
-        // get memeber from database
+        System.out.println("Enter member last name (case sensitive):");
+        String lastName = scanner.nextLine();
 
-        //if found
-        System.out.println("Member Name: " + memberName);
-        System.out.println("Member Details: [Placeholder details]");
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Members WHERE first_name = ? AND last_name = ?");
+        stmt.setString(1, firstName);
+        stmt.setString(2, lastName);
 
-        //else
-        System.out.println("Member " + memberName + " not found.");
+        ResultSet rs = stmt.executeQuery();
 
+        if (!rs.next()) {
+            System.out.println("Member " + firstName + " " + lastName + " not found.");
+            System.out.println("Returning to menu.\n");
+            return;
+        }
+
+        System.out.println("Member " + lastName + ", " + firstName + "'s profile:\n");
+
+        System.out.println("Member ID: " + rs.getInt("member_id"));
+        System.out.println("Email: " + rs.getString("email"));
+        System.out.println("Phone: " + rs.getString("phone"));
+        System.out.println("Date of Birth: " + rs.getDate("date_of_birth"));
+        System.out.println("Height: " + rs.getDouble("height"));
+        System.out.println("Weight: " + rs.getDouble("weight"));
+        System.out.println("Fitness Goal: " + rs.getString("fitness_goal"));
+        System.out.println("Join Date: " + rs.getDate("join_date"));
+
+        System.out.println("Returning to menu.\n");
     }
-
 
 }
