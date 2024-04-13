@@ -25,7 +25,6 @@ CREATE TABLE Trainers (
 );
 
 CREATE TABLE TrainerAvailability (
-    availability_id SERIAL PRIMARY KEY,
     trainer_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
