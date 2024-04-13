@@ -79,7 +79,7 @@ public class Member {
         query = ("""
             SELECT gs.*, t.first_name as trainer_first_name, t.last_name as trainer_last_name
             FROM GroupSession gs
-            JOIN GroupSessionEnrollment gse ON gs.session_id = gse.session_id
+            JOIN GroupSessionEnrollment gse ON gs.group_session_id = gse.group_session_id
             JOIN Trainers t ON gs.trainer_id = t.trainer_id
             WHERE gse.member_id = ?""");
 
@@ -192,6 +192,12 @@ public class Member {
             return;
         }
 
+        if (!Main.processPayment(conn, scanner, 10, memberId, "Session Sign-up Fee")) {
+            System.out.println("Payment failed. Please try again. ");
+            return;
+        }
+
+
         LocalTime startTime = selectedRs.getTime("start_time").toLocalTime();
         LocalTime endTime = selectedRs.getTime("end_time").toLocalTime();
         boolean isGroupSession = selectedRs.getBoolean("is_group_availability");
@@ -205,7 +211,7 @@ public class Member {
 
         String groupSessionEnrollmentQuery = """
                             SELECT gs.* FROM GroupSession gs
-                            INNER JOIN GroupSessionEnrollment ge ON gs.session_id = ge.session_id
+                            INNER JOIN GroupSessionEnrollment ge ON gs.group_session_id = ge.group_session_id
                             WHERE ge.member_id = ? AND gs.session_date = ? AND
                                   ((gs.start_time >= ? AND gs.start_time < ?) OR
                                   (gs.end_time > ? AND gs.end_time <= ?))""";
@@ -302,7 +308,7 @@ public class Member {
         int groupSessionId;
 
         if (groupSessionRs.next()) {
-            groupSessionId = groupSessionRs.getInt("session_id");
+            groupSessionId = groupSessionRs.getInt("group_session_id");
         } else {
             // If a group session doesn't exist, add it to the GroupSession table
             String insertGroupSessionQuery = """
@@ -327,7 +333,7 @@ public class Member {
 
         // After obtaining the group session ID, enroll the member into the session
         String enrollGroupSessionQuery = """
-                                INSERT INTO GroupSessionEnrollment (session_id, member_id)
+                                INSERT INTO GroupSessionEnrollment (group_session_id, member_id)
                                 VALUES (?, ?)""";
 
         PreparedStatement enrollGroupSessionStmt = conn.prepareStatement(enrollGroupSessionQuery);

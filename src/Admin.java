@@ -144,6 +144,7 @@ public class Admin {
     }
 
     private static void billing(int adminId, Connection conn, Scanner scanner) {
+
     }
 
 }
