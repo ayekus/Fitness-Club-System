@@ -28,6 +28,7 @@ CREATE TABLE TrainerAvailability (
     trainer_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
+    is_group_availability BOOLEAN NOT NULL,
     FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
 );
 
