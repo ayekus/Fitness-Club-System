@@ -44,11 +44,16 @@ public class Trainer {
         stmt.setInt(1, trainerId);
         ResultSet rs = stmt.executeQuery();
 
-        System.out.println("Current Availability:");
+
+        if (!rs.isBeforeFirst()) {
+            System.out.println("\nYou currently have no availability. ");
+        } else {
+            System.out.println("\nCurrent Availability:");
+        }
         int count = 0;
         while (rs.next()) {
             System.out.println("Availability " + ++count + ": ");
-            System.out.println(rs.getTime("start_time") + " - " + rs.getTime("end_time") + "\n");
+            System.out.println(rs.getTime("start_time") + " - " + rs.getTime("end_time") + " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
         }
 
         System.out.print("Would you like to change your availability (y/n): ");
@@ -58,18 +63,18 @@ public class Trainer {
             while (true) {
                 System.out.println("""
                     Please select an option:
-                       1. Remove a time slot
-                       2. Add a time slot""");
+                       1. Add a time slot
+                       2. Remove a time slot""");
                 System.out.print("Enter your choice: ");
 
                 choice = scanner.nextLine().trim();
 
                 switch (choice) {
                     case "1":
-                        removeAvailability(trainerId, conn, scanner);
+                        addAvailability(trainerId, conn, scanner);
                         return;
                     case "2":
-                        addAvailability(trainerId, conn, scanner);
+                        removeAvailability(trainerId, conn, scanner);
                         return;
                     default:
                         System.out.println("Invalid choice, please try again.\n");
@@ -87,16 +92,21 @@ public class Trainer {
         System.out.print("Enter end time of availability to add (HH:mm:ss): ");
         String endTime = scanner.nextLine().trim();
 
-        String query = "INSERT INTO TrainerAvailability (trainer_id, start_time, end_time) VALUES (?, ?, ?)";
+        System.out.print("Is this availability for a group session? (y/n): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        boolean isGroupAvailability = input.equals("y") || input.equals("yes");
+
+        String query = "INSERT INTO TrainerAvailability (trainer_id, start_time, end_time, is_group_availability) VALUES (?, ?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setInt(1, trainerId);
         stmt.setTime(2, Time.valueOf(startTime));
         stmt.setTime(3, Time.valueOf(endTime));
+        stmt.setBoolean(4, isGroupAvailability);
 
         stmt.executeUpdate();
         stmt.close();
 
-        System.out.println("Availability added successfully.\n");
+        System.out.println("Availability added successfully.");
 
         changeAvailability(trainerId, conn, scanner);
     }
@@ -116,9 +126,9 @@ public class Trainer {
         int rowsAffected = stmt.executeUpdate();
 
         if (rowsAffected > 0) {
-            System.out.println("Availability removed successfully.\n");
+            System.out.println("Availability removed successfully.");
         } else {
-            System.out.println("No matching availability found to remove.\n");
+            System.out.println("No matching availability found to remove.");
         }
 
         stmt.close();
