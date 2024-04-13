@@ -76,3 +76,23 @@ CREATE TABLE GroupSessionEnrollment (
     FOREIGN KEY (member_id) REFERENCES Members(member_id)
 );
 
+CREATE TABLE Payments (
+    payment_id SERIAL PRIMARY KEY,
+    member_id INTEGER NOT NULL,
+    payment_date DATE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_desc VARCHAR(255),
+    FOREIGN KEY (member_id) REFERENCES Members(member_id)
+);
+
+CREATE TABLE ApprovedPayments (
+    payment_id INTEGER NOT NULL,
+    member_id INTEGER NOT NULL,
+    payment_date DATE NOT NULL,
+    admin_id INTEGER NOT NULL,
+    date_approved DATE NOT NULL,
+    payment_desc VARCHAR(255),
+    FOREIGN KEY (payment_id) REFERENCES Payments(payment_id),
+    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id),
+    PRIMARY KEY (payment_id)
+);
