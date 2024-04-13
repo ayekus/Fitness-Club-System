@@ -171,7 +171,7 @@ public class Main {
         String dob = scanner.nextLine();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date dobDate = null;
+        Date dobDate;
         try {
             dobDate = new Date(sdf.parse(dob).getTime());
         } catch (ParseException e) {
