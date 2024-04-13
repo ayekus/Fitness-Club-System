@@ -9,13 +9,13 @@ import java.util.Scanner;
 public class Member {
 
     public static void main(int memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
-        while(true) {
+        while (true) {
             System.out.println("""
-                        Please select an option:
-                           1. View Profile
-                           2. Display Dashboard
-                           3. Schedule Management
-                           4. Leave System""");
+                    Please select an option:
+                       1. View Profile
+                       2. Display Dashboard
+                       3. Schedule Management
+                       4. Leave System""");
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine();
@@ -76,16 +76,16 @@ public class Member {
 
     public static void updateProfile(Integer memberId, Connection conn, Scanner scanner, String[] profile) throws SQLException, ParseException {
         System.out.println("""
-                        What would you like to update today?
-                           1. First Name
-                           2. Last Name
-                           3. Email
-                           4. Password
-                           5. Phone
-                           6. Date of Birth
-                           7. Height
-                           8. Weight
-                           9. Fitness Goal""");
+                What would you like to update today?
+                   1. First Name
+                   2. Last Name
+                   3. Email
+                   4. Password
+                   5. Phone
+                   6. Date of Birth
+                   7. Height
+                   8. Weight
+                   9. Fitness Goal""");
         System.out.print("Enter your choice or multiple choices separated by commas (e.g., 6, 7 for height and weight): ");
 
         String choices = scanner.nextLine();
@@ -224,103 +224,85 @@ public class Member {
         return null;
     }
 
-    public static void updateExerciseRoutines(String data, Integer memberId, Connection conn) {
-        String sql = "UPDATE members SET exercise_routines = ? WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, data);
-            pstmt.setInt(2, memberId);
-            pstmt.executeUpdate();
-            System.out.println("Exercise routines updated successfully!");
-        } catch (SQLException e) {
-            System.out.println("Error updating exercise routines: " + e.getMessage());
-        }
-    }
 
-    public static void updateFitnessAchievements(String data, Integer memberId, Connection conn) {
-        String sql = "UPDATE members SET fitness_achievements = ? WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, data);
-            pstmt.setInt(2, memberId);
-            pstmt.executeUpdate();
-            System.out.println("Fitness achievements updated successfully!");
-        } catch (SQLException e) {
-            System.out.println("Error updating fitness achievements: " + e.getMessage());
-        }
-    }
-
-    public static void updateHealthStats(String data, Integer memberId, Connection conn) {
-        String sql = "UPDATE members SET health_stats = ? WHERE member_id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, data);
-            pstmt.setInt(2, memberId);
-            pstmt.executeUpdate();
-            System.out.println("Health statistics updated successfully!");
-        } catch (SQLException e) {
-            System.out.println("Error updating health statistics: " + e.getMessage());
-        }
-    }
-
-    public static void displayDashboard(Integer memberId, Connection conn, Scanner scanner) {
-
+    public static void displayDashboard(Integer memberId, Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Dashboard:");
+        String[] info = new String[3];
+        info[0] = getExerciseRoutines(memberId, conn);
+        info[1] = getFitnessAchievements(memberId, conn);
+        info[2] = getHealthStats(memberId, conn);
 
-        String exerciseRoutines = getExerciseRoutines(memberId, conn);
-        String fitnessAchievements = getFitnessAchievements(memberId, conn);
-        String healthStats = getHealthStats(memberId, conn);
-
-        boolean dataMissing = false;
-
-        if (exerciseRoutines == null) {
+        if (info[0] == null) {
             System.out.println("No exercise routines found.");
-            dataMissing = true;
         } else {
-            System.out.println("Exercise Routines: " + exerciseRoutines);
+            System.out.println("Exercise Routines: " + info[0]);
         }
 
-        if (fitnessAchievements == null) {
+        if (info[1] == null) {
             System.out.println("No fitness achievements found.");
-            dataMissing = true;
         } else {
-            System.out.println("Fitness Achievements: " + fitnessAchievements);
+            System.out.println("Fitness Achievements: " + info[1]);
         }
 
-        if (healthStats == null) {
+        if (info[2] == null) {
             System.out.println("No health statistics found.");
-            dataMissing = true;
         } else {
-            System.out.println("Health Statistics: " + healthStats);
+            System.out.println("Health Statistics: " + info[2]);
         }
 
-        if (dataMissing) {
-            System.out.println("Please enter the missing information:");
-            while (true) {
-                System.out.println("1. Enter Exercise Routines");
-                System.out.println("2. Enter Fitness Achievements");
-                System.out.println("3. Enter Health Statistics");
-                System.out.println("4. Exit");
-                System.out.print("Enter your choice: ");
-                String choice = scanner.nextLine();
+        System.out.println("Would you like to update any of the information (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
 
-                switch (choice) {
-                    case "1":
-                        System.out.print("Enter Exercise Routines: ");
-                        updateExerciseRoutines(scanner.nextLine(), memberId, conn);
-                        break;
-                    case "2":
-                        System.out.print("Enter Fitness Achievements: ");
-                        updateFitnessAchievements(scanner.nextLine(), memberId, conn);
-                        break;
-                    case "3":
-                        System.out.print("Enter Health Statistics: ");
-                        updateHealthStats(scanner.nextLine(), memberId, conn);
-                        break;
-                    case "4":
-                        return; // Exit the input loop
-                    default:
-                        System.out.println("Invalid choice. Please enter a valid number.");
-                        break;
-                }
+        if (choice.equals("y") || choice.equals("yes")) {
+            updateDashboard(memberId, conn, scanner, info);
+            return;
+        }
+
+        System.out.println("Returning back to main menu.\n");
+    }
+
+    public static void updateDashboard(Integer memberId, Connection conn, Scanner scanner, String[] info) throws SQLException {
+        System.out.println("""
+                What would you like to update today?
+                   1. Exercise Routines
+                   2. Fitness Achievements
+                   3. Health Statistics""");
+        System.out.print("Enter your choice or multiple choices separated by commas (e.g., 1, 2 for two selections): ");
+
+        String choices = scanner.nextLine();
+        String[] updates = choices.split(",");
+
+        for (String update : updates) {
+            int val = Integer.parseInt(update.trim());
+            switch (val) {
+                case 1:
+                    System.out.print("Enter Exercise Routines: ");
+                    info[val-1] = scanner.nextLine();
+                    break;
+                case 2:
+                    System.out.print("Enter Fitness Achievements: ");
+                    info[val-1] = scanner.nextLine();
+                    break;
+                case 3:
+                    System.out.print("Enter Health Statistics: ");
+                    info[val-1] = scanner.nextLine();
+                    break;
+                default:
+                    System.out.println(val + " is an invalid choice.");
+                    break;
             }
         }
+
+        String SQL = "UPDATE Members SET exercise_routines = ?, fitness_achievements = ?, health_stats = ? WHERE member_id = ?";
+        PreparedStatement pstmt = conn.prepareStatement(SQL);
+        pstmt.setString(1, info[0]);
+        pstmt.setString(2, info[1]);
+        pstmt.setString(3, info[2]);
+        pstmt.setInt(4, memberId);
+
+        pstmt.executeUpdate();
+        System.out.println("Dashboard updated successfully!\n");
+
+        displayDashboard(memberId, conn, scanner);
     }
 }
