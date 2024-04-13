@@ -73,7 +73,7 @@ public class Main {
 
         if (rs.next()) {
             System.out.println("Logging in.\nWelcome " + rs.getString("first_name"));
-            // Call something in member using rs.getInt("member_id") as init member id.
+            Member.main(rs.getInt("member_id"), conn, scanner);
         } else {
             System.out.print("Invalid email and password combination, ");
             return;
@@ -204,11 +204,25 @@ public class Main {
                 System.out.print("Enter a valid number for height and weight, ");
                 return;
             }
+
             stmt.setString(9, fitnessGoals);
             stmt.executeUpdate();
             System.out.println("You have registered successfully!");
 
-            // Login to user
+            stmt.close();
+
+            PreparedStatement pstmt = conn.prepareStatement("SELECT member_id FROM Members WHERE email = ? AND password = ?");
+            pstmt.setString(1, email);
+            pstmt.setString(2, password);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            System.out.println("Logging in.\nWelcome " + firstName);
+            Member.main(rs.getInt("member_id"), conn, scanner);
+
+            rs.close();
+            pstmt.close();
+
         } catch (SQLException e) {
             System.out.println("Error registering new member: " + e.getMessage());
         }

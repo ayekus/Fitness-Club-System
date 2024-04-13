@@ -11,7 +11,6 @@ public class Member {
     public static void main(int memberId, Connection conn, Scanner scanner) throws SQLException {
         while(true) {
             System.out.println("""
-                        Signed in Successfully!
                         Please select an option:
                            1. Update Profile
                            2. Display Dashboard

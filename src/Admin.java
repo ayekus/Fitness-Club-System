@@ -7,7 +7,6 @@ public class Admin {
     public static void main(int adminId, Connection conn, Scanner scanner) throws SQLException {
         while(true) {
             System.out.println("""
-                    Signed in Successfully!
                     Please select an option:
                        1. Room Booking Management
                        2. Equipment Maintenance Monitoring
