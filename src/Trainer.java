@@ -1,7 +1,4 @@
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -11,8 +8,8 @@ public class Trainer {
         while(true) {
                 System.out.println("""
                         Please select an option:
-                           1. Set Availability
-                           2. Show Schedule
+                           1. Change Availability
+                           2. View Schedule
                            3. View Member Profile
                            4. Leave System""");
             System.out.print("Enter your choice: ");
@@ -21,7 +18,7 @@ public class Trainer {
 
             switch (choice) {
                 case "1":
-                    addAvailability(trainerId, conn, scanner);
+                    changeAvailability(trainerId, conn, scanner);
                     break;
                 case "2":
                     displaySchedule(trainerId, conn);
@@ -41,16 +38,95 @@ public class Trainer {
         }
     }
 
-    public static void addAvailability(int trainerId, Connection conn, Scanner scanner) {
-        System.out.println("Enter date and time for availability (format: yyyy-mm-dd):");
-        String dateString = scanner.nextLine().trim();
-        try {
-            // add to database
-            System.out.println("Added new availability at: " + dateString);
-        } catch (Exception e) {
-            System.out.println("Invalid date format.");
+    public static void changeAvailability(int trainerId, Connection conn, Scanner scanner) throws SQLException {
+        String query = "SELECT * FROM TrainerAvailability WHERE trainer_id = ? ORDER BY start_time";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setInt(1, trainerId);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("Current Availability:");
+        int count = 0;
+        while (rs.next()) {
+            System.out.println("Availability " + ++count + ": ");
+            System.out.println(rs.getTime("start_time") + " - " + rs.getTime("end_time") + "\n");
         }
+
+        System.out.print("Would you like to change your availability (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        if (choice.equals("y") || choice.equals("yes")) {
+            while (true) {
+                System.out.println("""
+                    Please select an option:
+                       1. Remove a time slot
+                       2. Add a time slot""");
+                System.out.print("Enter your choice: ");
+
+                choice = scanner.nextLine().trim();
+
+                switch (choice) {
+                    case "1":
+                        removeAvailability(trainerId, conn, scanner);
+                        return;
+                    case "2":
+                        addAvailability(trainerId, conn, scanner);
+                        return;
+                    default:
+                        System.out.println("Invalid choice, please try again.\n");
+                        break;
+                }
+            }
+        }
+
+        System.out.println("Returning back to main menu.\n");
     }
+
+    public static void addAvailability(int trainerId, Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter start time of availability to add (HH:mm:ss): ");
+        String startTime = scanner.nextLine().trim();
+        System.out.print("Enter end time of availability to add (HH:mm:ss): ");
+        String endTime = scanner.nextLine().trim();
+
+        String query = "INSERT INTO TrainerAvailability (trainer_id, start_time, end_time) VALUES (?, ?, ?)";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setInt(1, trainerId);
+        stmt.setTime(2, Time.valueOf(startTime));
+        stmt.setTime(3, Time.valueOf(endTime));
+
+        stmt.executeUpdate();
+        stmt.close();
+
+        System.out.println("Availability added successfully.\n");
+
+        changeAvailability(trainerId, conn, scanner);
+    }
+
+    public static void removeAvailability(int trainerId, Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter the start time of availability to remove (HH:mm:ss): ");
+        String startTime = scanner.nextLine().trim();
+        System.out.print("Enter the end time of availability to remove (HH:mm:ss): ");
+        String endTime = scanner.nextLine().trim();
+
+        String query = "DELETE FROM TrainerAvailability WHERE trainer_id = ? AND start_time = ? AND end_time = ?";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setInt(1, trainerId);
+        stmt.setTime(2, Time.valueOf(startTime));
+        stmt.setTime(3, Time.valueOf(endTime));
+
+        int rowsAffected = stmt.executeUpdate();
+
+        if (rowsAffected > 0) {
+            System.out.println("Availability removed successfully.\n");
+        } else {
+            System.out.println("No matching availability found to remove.\n");
+        }
+
+        stmt.close();
+
+        changeAvailability(trainerId, conn, scanner);
+    }
+
+
 
     public static void displaySchedule(int trainerId, Connection conn) {
         // get values from database

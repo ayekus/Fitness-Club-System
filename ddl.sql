@@ -22,10 +22,16 @@ CREATE TABLE Trainers (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20) UNIQUE,
     date_of_birth DATE
-    time_slot VARCHAR(100),
-    start_time TIME,
-    end_time TIME
 );
+
+CREATE TABLE TrainerAvailability (
+    availability_id SERIAL PRIMARY KEY,
+    trainer_id INT NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
+);
+
 
 CREATE TABLE Admin (
     admin_id SERIAL PRIMARY KEY,
