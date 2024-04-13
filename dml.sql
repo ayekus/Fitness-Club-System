@@ -9,10 +9,9 @@ INSERT INTO Trainers (first_name, last_name, email, password, phone, date_of_bir
 INSERT INTO Admin (first_name, last_name, email, password, phone, date_of_birth) VALUES
 ('Carol', 'Taylor', 'caroltaylor@example.com', 'adminpassword1', '555-555-0301', '1975-03-11'),
 ('David', 'Smith', 'davidsmith@example.com', 'adminpassword2', '555-555-0302', '1985-08-19');
+('Joe', 'Ryan', 'joeryan@example.com', 'adminpassword3', '555-555-0303', '1995-04-27');
 
 INSERT INTO EquipmentMaintenance (equipment_name, admin_id) VALUES
 ('Treadmill', 1),
 ('Elliptical Machine', 2),
 ('Stationary Bike', 3),
-('Dumbbells', 1),
-('Bench Press', 2);

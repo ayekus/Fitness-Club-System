@@ -32,7 +32,7 @@ public class Main {
                        5. Exit""");
             System.out.print("Enter your choice: ");
 
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -61,9 +61,9 @@ public class Main {
 
     public static void memberSignIn(Connection conn, Scanner scanner) throws SQLException, ParseException {
         System.out.print("Enter email: ");
-        String email = scanner.nextLine();
+        String email = scanner.nextLine().trim();
         System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String password = scanner.nextLine().trim();
 
         PreparedStatement stmt = conn.prepareStatement("SELECT member_id, first_name FROM Members WHERE email = ? AND password = ?");
         stmt.setString(1, email);
@@ -85,9 +85,9 @@ public class Main {
 
     public static void trainerSignIn(Connection conn, Scanner scanner) throws SQLException {
         System.out.print("Enter email: ");
-        String email = scanner.nextLine();
+        String email = scanner.nextLine().trim();
         System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String password = scanner.nextLine().trim();
 
         PreparedStatement stmt = conn.prepareStatement("SELECT trainer_id, first_name FROM Trainers WHERE email = ? AND password = ?");
         stmt.setString(1, email);
@@ -109,9 +109,9 @@ public class Main {
 
     public static void adminSignIn(Connection conn, Scanner scanner) throws SQLException {
         System.out.print("Enter email: ");
-        String email = scanner.nextLine();
+        String email = scanner.nextLine().trim();
         System.out.print("Enter password: ");
-        String password = scanner.nextLine();
+        String password = scanner.nextLine().trim();
 
         PreparedStatement stmt = conn.prepareStatement("SELECT admin_id, first_name FROM Admin WHERE email = ? AND password = ?");
         stmt.setString(1, email);
@@ -133,11 +133,11 @@ public class Main {
 
     public static void register(Connection conn, Scanner scanner) throws ParseException {
         System.out.print("Enter Email: ");
-        String email = scanner.nextLine();
+        String email = scanner.nextLine().trim();
 
         if (!email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
             System.out.print("Invalid Email format, please try again: ");
-            email = scanner.nextLine();
+            email = scanner.nextLine().trim();
 
             if (!email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$")) {
                 System.out.println("Invalid Email format.");
@@ -146,20 +146,20 @@ public class Main {
         }
 
         System.out.print("Enter Password: ");
-        String password = scanner.nextLine();
+        String password = scanner.nextLine().trim();
 
         System.out.print("Enter First Name: ");
-        String firstName = scanner.nextLine();
+        String firstName = scanner.nextLine().trim();
 
         System.out.print("Enter Last Name: ");
-        String lastName = scanner.nextLine();
+        String lastName = scanner.nextLine().trim();
 
         System.out.print("Enter Phone Number: ");
-        String phoneNumber = scanner.nextLine();
+        String phoneNumber = scanner.nextLine().trim();
 
         if (!phoneNumber.matches("^\\d{3}-\\d{3}-\\d{4}$")) {
             System.out.print("Invalid Phone Number, please try again: ");
-            phoneNumber = scanner.nextLine();
+            phoneNumber = scanner.nextLine().trim();
 
             if (!phoneNumber.matches("^\\d{3}-\\d{3}-\\d{4}$")) {
                 System.out.println("Invalid Phone Number.");
@@ -168,7 +168,7 @@ public class Main {
         }
 
         System.out.print("Enter Date of Birth (yyyy-mm-dd): ");
-        String dob = scanner.nextLine();
+        String dob = scanner.nextLine().trim();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dobDate;
@@ -180,13 +180,13 @@ public class Main {
         }
 
         System.out.print("Enter Height: ");
-        String height = scanner.nextLine();
+        String height = scanner.nextLine().trim();
 
         System.out.print("Enter Weight: ");
-        String weight = scanner.nextLine();
+        String weight = scanner.nextLine().trim();
 
         System.out.print("Enter Fitness Goals: ");
-        String fitnessGoals = scanner.nextLine();
+        String fitnessGoals = scanner.nextLine().trim();
 
         try {
             String sql = "INSERT INTO Members (first_name, last_name, email, password, phone, date_of_birth, height, weight, fitness_goal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";

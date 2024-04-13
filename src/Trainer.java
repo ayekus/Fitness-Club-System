@@ -17,7 +17,7 @@ public class Trainer {
                            4. Leave System""");
             System.out.print("Enter your choice: ");
 
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -43,7 +43,7 @@ public class Trainer {
 
     public static void addAvailability(int trainerId, Connection conn, Scanner scanner) {
         System.out.println("Enter date and time for availability (format: yyyy-mm-dd):");
-        String dateString = scanner.nextLine();
+        String dateString = scanner.nextLine().trim();
         try {
             // add to database
             System.out.println("Added new availability at: " + dateString);
@@ -63,10 +63,10 @@ public class Trainer {
 
     public static void viewMemberProfile(Connection conn, Scanner scanner) throws SQLException {
         System.out.println("Enter member first name (case sensitive):");
-        String firstName = scanner.nextLine();
+        String firstName = scanner.nextLine().trim();
 
         System.out.println("Enter member last name (case sensitive):");
-        String lastName = scanner.nextLine();
+        String lastName = scanner.nextLine().trim();
 
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Members WHERE first_name = ? AND last_name = ?");
         stmt.setString(1, firstName);

@@ -18,7 +18,7 @@ public class Member {
                        4. Leave System""");
             System.out.print("Enter your choice: ");
 
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -63,7 +63,7 @@ public class Member {
         rs.close();
         stmt.close();
 
-        System.out.println("Would you like to update your information (y/n): ");
+        System.out.print("Would you like to update your information (y/n): ");
         String choice = scanner.nextLine().trim().toLowerCase();
 
         if (choice.equals("y") || choice.equals("yes")) {
@@ -88,7 +88,7 @@ public class Member {
                    9. Fitness Goal""");
         System.out.print("Enter your choice or multiple choices separated by commas (e.g., 6, 7 for height and weight): ");
 
-        String choices = scanner.nextLine();
+        String choices = scanner.nextLine().trim();
         String[] updates = choices.split(",");
         java.sql.Date dobDate = null;
 
@@ -97,27 +97,27 @@ public class Member {
             switch (val) {
                 case 1:
                     System.out.print("Enter new first name:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 2:
                     System.out.print("Enter new last name:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 3:
                     System.out.print("Enter new email:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 4:
                     System.out.print("Enter new password:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 5:
                     System.out.println("Enter new phone:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 6:
                     System.out.println("Enter new date of birth (yyyy-mm-dd):");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
 
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     try {
@@ -129,15 +129,15 @@ public class Member {
                     break;
                 case 7:
                     System.out.println("Enter new height:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 8:
                     System.out.println("Enter new weight:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 case 9:
                     System.out.println("Enter new fitness goal:");
-                    profile[val - 1] = scanner.nextLine();
+                    profile[val - 1] = scanner.nextLine().trim();
                     break;
                 default:
                     System.out.println(val + " is an invalid choice.");
@@ -210,7 +210,7 @@ public class Member {
             System.out.println("Health Statistics: " + info[2]);
         }
 
-        System.out.println("Would you like to update any of the information (y/n): ");
+        System.out.print("Would you like to update any of the information (y/n): ");
         String choice = scanner.nextLine().trim().toLowerCase();
 
         if (choice.equals("y") || choice.equals("yes")) {
@@ -229,7 +229,7 @@ public class Member {
                    3. Health Statistics""");
         System.out.print("Enter your choice or multiple choices separated by commas (e.g., 1, 2 for two selections): ");
 
-        String choices = scanner.nextLine();
+        String choices = scanner.nextLine().trim();
         String[] updates = choices.split(",");
 
         for (String update : updates) {
@@ -237,15 +237,15 @@ public class Member {
             switch (val) {
                 case 1:
                     System.out.print("Enter Exercise Routines: ");
-                    info[val-1] = scanner.nextLine();
+                    info[val-1] = scanner.nextLine().trim();
                     break;
                 case 2:
                     System.out.print("Enter Fitness Achievements: ");
-                    info[val-1] = scanner.nextLine();
+                    info[val-1] = scanner.nextLine().trim();
                     break;
                 case 3:
                     System.out.print("Enter Health Statistics: ");
-                    info[val-1] = scanner.nextLine();
+                    info[val-1] = scanner.nextLine().trim();
                     break;
                 default:
                     System.out.println(val + " is an invalid choice.");

@@ -1,5 +1,4 @@
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Scanner;
 
 public class Admin {
@@ -15,7 +14,7 @@ public class Admin {
                        5. Leave System""");
             System.out.print("Enter your choice: ");
 
-            String choice = scanner.nextLine();
+            String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
@@ -36,7 +35,7 @@ public class Admin {
                     scanner.close();
                     System.exit(0);
                 default:
-                    System.out.println("Invalid choice, please try again.");
+                    System.out.println("Invalid choice, please try again.\n");
                     break;
             }
         }
@@ -45,9 +44,102 @@ public class Admin {
     private static void roomManagement(int adminId, Connection conn, Scanner scanner) {
     }
 
-    private static void monitorEquipment(int adminId, Connection conn, Scanner scanner) {
+    private static void monitorEquipment(int adminId, Connection conn, Scanner scanner) throws SQLException {
+        String query = ("""
+                SELECT em.*, a.first_name, a.last_name
+                FROM EquipmentMaintenance em
+                JOIN Admin a ON em.admin_id = a.admin_id""");
+
+        Statement stmt = conn.createStatement();
+
+        ResultSet rs = stmt.executeQuery(query);
+
+        if (!rs.next()) {
+            System.out.println("There is no equipment that needs repairs. Returning to menu.\n");
+            return;
+        }
+
+        System.out.println("Here is the list of equipment that needs repairs: \n");
+        int num = 0;
+        while (rs.next()) {
+            System.out.println(++num + ": ");
+            System.out.println("   Equipment: " + rs.getString("equipment_name"));
+            System.out.println("   Added by admin: " + rs.getString("last_name") + ", " + rs.getString("first_name"));
+            System.out.println("   Date Added: " + rs.getDate("date_added") + "\n");
+        }
+
+        rs.close();
+        stmt.close();
+
+        System.out.print("Would you like to add to the maintenance list or repair an item on the list (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        if (choice.equals("y") || choice.equals("yes")) {
+            while (true) {
+                System.out.println("""
+                    Please select an option:
+                       1. Add Maintenance Equipment
+                       2. Repair Equipment""");
+                System.out.print("Enter your choice: ");
+
+                choice = scanner.nextLine().trim();
+
+                switch (choice) {
+                    case "1":
+                        addEquipment(adminId, conn, scanner);
+                        return;
+                    case "2":
+                        runMaintenance(adminId, conn, scanner);
+                        return;
+                    default:
+                        System.out.println("Invalid choice, please try again.\n");
+                        break;
+                }
+            }
+        }
+
+        System.out.println("Returning back to main menu.\n");
 
     }
+
+    private static void addEquipment(int adminId, Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter the equipment that needs maintenance: ");
+        String equipmentName = scanner.nextLine().trim();
+
+        String query = "INSERT INTO EquipmentMaintenance (equipment_name, admin_id) VALUES (?, ?)";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setString(1, equipmentName);
+        stmt.setInt(2, adminId);
+
+        stmt.executeUpdate();
+
+        stmt.close();
+
+        System.out.println("Equipment Maintenance added successfully!\n");
+
+        monitorEquipment(adminId, conn, scanner);
+    }
+
+    private static void runMaintenance(int adminId, Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter the equipment name that is being repaired (case sensitive): ");
+        String equipmentName = scanner.nextLine().trim();
+        String query = "DELETE FROM EquipmentMaintenance WHERE equipment_name = ?";
+
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setString(1, equipmentName);
+
+        int rowsAffected = stmt.executeUpdate();
+
+        if (rowsAffected > 0) {
+            System.out.println("Maintenance record for " + equipmentName + " removed successfully.\n");
+        } else {
+            System.out.println("No maintenance record found for " + equipmentName + ".\n");
+        }
+
+        stmt.close();
+        monitorEquipment(adminId, conn, scanner);
+    }
+
 
     private static void updateSchedule(int adminId, Connection conn, Scanner scanner) {
     }
