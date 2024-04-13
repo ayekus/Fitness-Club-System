@@ -25,10 +25,12 @@ CREATE TABLE Trainers (
 );
 
 CREATE TABLE TrainerAvailability (
+    availability_id SERIAL PRIMARY KEY,
     trainer_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     is_group_availability BOOLEAN NOT NULL,
+    session_name VARCHAR(255),
     FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
 );
 
@@ -61,7 +63,7 @@ CREATE TABLE TrainingSession (
     session_name VARCHAR(255) NOT NULL,
     FOREIGN KEY (member_id) REFERENCES Members(member_id),
     FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
-    );
+);
 
 CREATE TABLE GroupSession (
     session_id SERIAL PRIMARY KEY,
@@ -69,7 +71,6 @@ CREATE TABLE GroupSession (
     session_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    max_participants INTEGER,
     trainer_id INTEGER NOT NULL,
     FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
 );

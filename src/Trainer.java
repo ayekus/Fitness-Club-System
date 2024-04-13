@@ -53,7 +53,9 @@ public class Trainer {
         int count = 0;
         while (rs.next()) {
             System.out.println("Availability " + ++count + ": ");
-            System.out.println(rs.getTime("start_time") + " - " + rs.getTime("end_time") + " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
+            System.out.print(rs.getBoolean("is_group_availability") ? (rs.getString("session_name") + "\n") : "");
+            System.out.println(rs.getTime("start_time") + " - " + rs.getTime("end_time") +
+                    " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
         }
 
         System.out.print("Would you like to change your availability (y/n): ");
@@ -96,12 +98,19 @@ public class Trainer {
         String input = scanner.nextLine().trim().toLowerCase();
         boolean isGroupAvailability = input.equals("y") || input.equals("yes");
 
-        String query = "INSERT INTO TrainerAvailability (trainer_id, start_time, end_time, is_group_availability) VALUES (?, ?, ?, ?)";
+        String sessionName = null;
+        if (isGroupAvailability) {
+            System.out.print("What do you want to name the session: ");
+            sessionName = scanner.nextLine().trim();
+        }
+
+        String query = "INSERT INTO TrainerAvailability (trainer_id, start_time, end_time, is_group_availability, session_name) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setInt(1, trainerId);
         stmt.setTime(2, Time.valueOf(startTime));
         stmt.setTime(3, Time.valueOf(endTime));
         stmt.setBoolean(4, isGroupAvailability);
+        stmt.setString(5, sessionName);
 
         stmt.executeUpdate();
         stmt.close();

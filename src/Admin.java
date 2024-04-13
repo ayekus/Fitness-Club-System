@@ -9,7 +9,7 @@ public class Admin {
                     Please select an option:
                        1. Room Booking Management
                        2. Equipment Maintenance Monitoring
-                       3. Class Schedule Updating
+                       3. Manage Group Session Schedule
                        4. Billing and Payment Processing
                        5. Leave System""");
             System.out.print("Enter your choice: ");
@@ -60,12 +60,11 @@ public class Admin {
         }
 
         System.out.println("Here is the list of equipment that needs repairs: \n");
-        int num = 0;
         while (rs.next()) {
-            System.out.println(++num + ": ");
-            System.out.println("   Equipment: " + rs.getString("equipment_name"));
-            System.out.println("   Added by admin: " + rs.getString("last_name") + ", " + rs.getString("first_name"));
-            System.out.println("   Date Added: " + rs.getDate("date_added") + "\n");
+            System.out.println("Equipment Id: " + rs.getInt("maintenance_id"));
+            System.out.println("Equipment: " + rs.getString("equipment_name"));
+            System.out.println("Added by admin: " + rs.getString("last_name") + ", " + rs.getString("first_name"));
+            System.out.println("Date Added: " + rs.getDate("date_added") + "\n");
         }
 
         rs.close();
@@ -121,19 +120,19 @@ public class Admin {
     }
 
     private static void runMaintenance(int adminId, Connection conn, Scanner scanner) throws SQLException {
-        System.out.print("Enter the equipment name that is being repaired (case sensitive): ");
-        String equipmentName = scanner.nextLine().trim();
-        String query = "DELETE FROM EquipmentMaintenance WHERE equipment_name = ?";
+        System.out.print("Enter the equipment id that is being repaired: ");
+        String equipmentId = scanner.nextLine().trim();
+        String query = "DELETE FROM EquipmentMaintenance WHERE maintenance_id = ?";
 
         PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setString(1, equipmentName);
+        stmt.setInt(1, Integer.parseInt(equipmentId));
 
         int rowsAffected = stmt.executeUpdate();
 
         if (rowsAffected > 0) {
-            System.out.println("Maintenance record for " + equipmentName + " removed successfully.\n");
+            System.out.println("Maintenance record for equipment id " + equipmentId + " was removed successfully.\n");
         } else {
-            System.out.println("No maintenance record found for " + equipmentName + ".\n");
+            System.out.println("No maintenance record found for equipment id " + equipmentId + ".\n");
         }
 
         stmt.close();
