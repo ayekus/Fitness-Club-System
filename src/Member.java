@@ -28,6 +28,7 @@ public class Member {
                     displayDashboard(memberId, conn, scanner);
                     break;
                 case "3":
+                    viewSchedule(memberId, conn, scanner);
                     break;
                 case "4":
                     System.out.println("Exiting");
@@ -39,6 +40,63 @@ public class Member {
                     break;
             }
         }
+    }
+
+    public static void viewSchedule(Integer memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
+        String query = ("""
+                SELECT ts.session_name, ts.session_date, ts.start_time, ts.end_time, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
+                FROM TrainingSession ts
+                INNER JOIN Trainers t ON ts.trainer_id = t.trainer_id
+                WHERE ts.member_id = ?""");
+        PreparedStatement stmt = conn.prepareStatement(query);
+        stmt.setInt(1, memberId);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("\nHere is your current Schedule: ");
+        System.out.println("One-on-One Sessions:");
+
+        if (!rs.next()) {
+            System.out.println("You are not enrolled in any upcoming One-on-One Sessions.");
+        }
+        while (rs.next()) {
+            System.out.println(rs.getString("session_name") + " session on " +
+                    rs.getDate("session_date") + " from " + rs.getTime("start_time") +
+                    " to " + rs.getTime("end_time") + " with Trainer " +
+                    rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name") + "\n");
+        }
+
+        query = ("""
+                SELECT gs.session_name, gs.session_date, gs.start_time, gs.end_time, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
+                FROM GroupSession gs
+                INNER JOIN GroupSessionEnrollment ge ON gs.session_id = ge.session_id
+                INNER JOIN Trainers t ON gs.trainer_id = t.trainer_id
+                WHERE ge.member_id = ?""");
+        stmt = conn.prepareStatement(query);
+        stmt.setInt(1, memberId);
+        rs = stmt.executeQuery();
+
+        System.out.println("\nGroup Sessions:");
+        if (!rs.next()) {
+            System.out.println("You are not enrolled in any upcoming Group Sessions.\n");
+        }
+        while (rs.next()) {
+            System.out.println(rs.getString("session_name") + " session on " +
+                    rs.getDate("session_date") + " from " + rs.getTime("start_time") +
+                    " to " + rs.getTime("end_time") + " with Trainer " +
+                    rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name") + "\n");
+        }
+
+        rs.close();
+        stmt.close();
+
+//        System.out.print("Would you like to add a session (y/n): ");
+//        String choice = scanner.nextLine().trim().toLowerCase();
+//
+//        if (choice.equals("y") || choice.equals("yes")) {
+//            return;
+//        }
+
+        System.out.println("Returning back to main menu.\n");
     }
 
     public static void viewProfile(Integer memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
