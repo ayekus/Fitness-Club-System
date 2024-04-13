@@ -22,6 +22,9 @@ CREATE TABLE Trainers (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20) UNIQUE,
     date_of_birth DATE
+    time_slot VARCHAR(100),
+    start_time TIME,
+    end_time TIME
 );
 
 CREATE TABLE Admin (
