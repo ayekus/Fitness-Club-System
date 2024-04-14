@@ -136,6 +136,7 @@ public class Trainer {
 
         if (rowsAffected > 0) {
             System.out.println("Availability removed successfully.");
+            System.out.println("Please note, pre-booked sessions in that time slot will still be kept.");
         } else {
             System.out.println("No matching availability found to remove.");
         }
@@ -144,8 +145,6 @@ public class Trainer {
 
         changeAvailability(trainerId, conn, scanner);
     }
-
-
 
     public static void displaySchedule(int trainerId, Connection conn) throws SQLException {
         String trainingQuery = "SELECT * FROM TrainingSession WHERE trainer_id = ?";
@@ -159,7 +158,7 @@ public class Trainer {
             System.out.println("Session Date: " + trainingRs.getDate("session_date"));
             System.out.println("Start Time: " + trainingRs.getTime("start_time"));
             System.out.println("End Time: " + trainingRs.getTime("end_time"));
-//            System.out.println("Room ID: " + trainingRs.getInt("room_id"));
+            System.out.println("Room ID: " + trainingRs.getInt("room_id"));
             System.out.println();
         }
 
@@ -175,7 +174,7 @@ public class Trainer {
             System.out.println("Session Date: " + groupRs.getDate("session_date"));
             System.out.println("Start Time: " + groupRs.getTime("start_time"));
             System.out.println("End Time: " + groupRs.getTime("end_time"));
-//            System.out.println("Room ID: " + groupRs.getInt("room_id"));
+            System.out.println("Room ID: " + groupRs.getInt("room_id"));
             System.out.println();
         }
 

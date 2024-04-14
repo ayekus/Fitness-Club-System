@@ -41,7 +41,40 @@ public class Admin {
         }
     }
 
-    private static void roomManagement(int adminId, Connection conn, Scanner scanner) {
+    private static void roomManagement(int adminId, Connection conn, Scanner scanner) throws SQLException {
+        String query = """
+            SELECT ta.*, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
+            FROM TrainerAvailability ta
+            INNER JOIN Trainers t ON ta.trainer_id = t.trainer_id""";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("\nSessions Requiring Approval:\n");
+        boolean hasSessions = false;
+        while (rs.next()) {
+            String name = rs.getString("session_name");
+            hasSessions = true;
+            System.out.println("Availability ID: " + rs.getInt("availability_id"));
+
+            if (name != null) {
+                System.out.println(name);
+            }
+
+            System.out.println("Trainer: " + rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name"));
+            System.out.println("Start Time: " + rs.getTime("start_time") + " - End Time: " + rs.getTime("end_time") +
+                    " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
+        }
+
+        if (!hasSessions) {
+            System.out.println("There are no available sessions.\n");
+            return;
+        }
+
+        System.out.print("Enter the Availability ID of the session you want to approve: ");
+        int availabilityId = Integer.parseInt(scanner.nextLine().trim());
+
+
+
     }
 
     private static void monitorEquipment(int adminId, Connection conn, Scanner scanner) throws SQLException {

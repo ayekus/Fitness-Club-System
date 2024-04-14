@@ -53,6 +53,19 @@ CREATE TABLE EquipmentMaintenance (
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
 
+CREATE TABLE ApprovedSessions (
+    session_id SERIAL PRIMARY KEY,
+    trainer_id INTEGER NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    session_date DATE NOT NULL,
+    is_group_session BOOLEAN NOT NULL,
+    session_name VARCHAR(255) NOT NULL,
+    room_id INTEGER,
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id),
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
+);
+
 CREATE TABLE TrainingSession (
     training_session_id SERIAL PRIMARY KEY,
     member_id INTEGER NOT NULL,
