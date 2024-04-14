@@ -99,5 +99,5 @@ CREATE TABLE ApprovedPayments (
     admin_id INTEGER NOT NULL,
     payment_desc VARCHAR(255),
     date_approved DATE DEFAULT CURRENT_DATE,
-    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id),
+    FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
