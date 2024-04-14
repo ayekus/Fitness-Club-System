@@ -147,13 +147,42 @@ public class Trainer {
 
 
 
-    public static void displaySchedule(int trainerId, Connection conn) {
-        // get values from database
+    public static void displaySchedule(int trainerId, Connection conn) throws SQLException {
+        String trainingQuery = "SELECT * FROM TrainingSession WHERE trainer_id = ?";
+        PreparedStatement trainingStmt = conn.prepareStatement(trainingQuery);
+        trainingStmt.setInt(1, trainerId);
+        ResultSet trainingRs = trainingStmt.executeQuery();
 
-//        System.out.println("Current schedule for " + firstName + " " + lastName + ":");
-//        for (Date time : availableTimes) {
-//            System.out.println(time);
-//        }
+        System.out.println("One-on-one Session Schedule:");
+        while (trainingRs.next()) {
+            System.out.println("Session Name: " + trainingRs.getString("session_name"));
+            System.out.println("Session Date: " + trainingRs.getDate("session_date"));
+            System.out.println("Start Time: " + trainingRs.getTime("start_time"));
+            System.out.println("End Time: " + trainingRs.getTime("end_time"));
+//            System.out.println("Room ID: " + trainingRs.getInt("room_id"));
+            System.out.println();
+        }
+
+        String groupQuery = "SELECT * FROM GroupSession WHERE trainer_id = ?";
+        PreparedStatement groupStmt = conn.prepareStatement(groupQuery);
+        groupStmt.setInt(1, trainerId);
+        ResultSet groupRs = groupStmt.executeQuery();
+
+        System.out.println("Group Session Schedule:");
+        while (groupRs.next()) {
+            System.out.println("Session ID: " + groupRs.getInt("group_session_id"));
+            System.out.println("Session Name: " + groupRs.getString("session_name"));
+            System.out.println("Session Date: " + groupRs.getDate("session_date"));
+            System.out.println("Start Time: " + groupRs.getTime("start_time"));
+            System.out.println("End Time: " + groupRs.getTime("end_time"));
+//            System.out.println("Room ID: " + groupRs.getInt("room_id"));
+            System.out.println();
+        }
+
+        trainingRs.close();
+        trainingStmt.close();
+        groupRs.close();
+        groupStmt.close();
     }
 
     public static void viewMemberProfile(Connection conn, Scanner scanner) throws SQLException {
