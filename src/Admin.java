@@ -15,6 +15,7 @@ public class Admin {
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine().trim();
+            System.out.println();
 
             switch (choice) {
                 case "1":

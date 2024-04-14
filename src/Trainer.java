@@ -14,6 +14,7 @@ public class Trainer {
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine().trim();
+            System.out.println();
 
             switch (choice) {
                 case "1":
@@ -166,9 +167,8 @@ public class Trainer {
         groupStmt.setInt(1, trainerId);
         ResultSet groupRs = groupStmt.executeQuery();
 
-        System.out.println("Group Session Schedule:");
+        System.out.println("\nGroup Session Schedule:");
         while (groupRs.next()) {
-            System.out.println("Session ID: " + groupRs.getInt("group_session_id"));
             System.out.println("Session Name: " + groupRs.getString("session_name"));
             System.out.println("Session Date: " + groupRs.getDate("session_date"));
             System.out.println("Start Time: " + groupRs.getTime("start_time"));
@@ -211,7 +211,6 @@ public class Trainer {
         System.out.println("Height: " + rs.getDouble("height"));
         System.out.println("Weight: " + rs.getDouble("weight"));
         System.out.println("Fitness Goal: " + rs.getString("fitness_goal"));
-        System.out.println("Join Date: " + rs.getDate("join_date"));
 
         System.out.println("Returning to menu.\n");
     }

@@ -64,7 +64,7 @@ CREATE TABLE ApprovedSessions (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     is_group_session BOOLEAN NOT NULL,
-    session_name VARCHAR(255) NOT NULL,
+    session_name VARCHAR(255),
     room_id INTEGER,
     FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id),
     FOREIGN KEY (room_id) REFERENCES Rooms(room_id)

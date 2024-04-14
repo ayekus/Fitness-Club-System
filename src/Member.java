@@ -19,6 +19,7 @@ public class Member {
             System.out.print("Enter your choice: ");
 
             String choice = scanner.nextLine().trim();
+            System.out.println();
 
             switch (choice) {
                 case "1":
@@ -140,7 +141,7 @@ public class Member {
             System.out.println("Session ID: " + rs.getInt("session_id"));
             System.out.println("Trainer: " + rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name"));
             System.out.println("Start Time: " + rs.getTime("start_time") + " - End Time: " + rs.getTime("end_time") +
-                    " (Type: " + (rs.getBoolean("is_group_session") ? "Group" : "One-on-One"));
+                    " (Type: " + (rs.getBoolean("is_group_session") ? "Group)" : "One-on-One)"));
             System.out.println("Room: " + rs.getString("room_desc") + " Room");
         }
 
@@ -325,17 +326,25 @@ public class Member {
     }
 
     public static void viewProfile(Integer memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
-        String[] profile = new String[9];
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Members WHERE member_id = ?");
         stmt.setInt(1, memberId);
 
         ResultSet rs = stmt.executeQuery();
         rs.next();
 
-        System.out.println("Here is your information: ");
+        System.out.println("Here is your information: \n");
 
+        System.out.println("First Name: " + rs.getString("first_name"));
+        System.out.println("Last Name: " + rs.getString("last_name"));
+        System.out.println("Email: " + rs.getString("email"));
+        System.out.println("Phone: " + rs.getString("phone"));
+        System.out.println("Date of Birth: " + rs.getDate("date_of_birth"));
+        System.out.println("Height: " + rs.getBigDecimal("height"));
+        System.out.println("Weight: " + rs.getBigDecimal("weight"));
+        System.out.println("Fitness Goal: " + rs.getString("fitness_goal"));
+
+        String[] profile = new String[9];
         for (int i = 0; i < 8; i++) {
-            System.out.println(rs.getString(i + 2));
             if (i != 5) {
                 profile[i] = rs.getString(i + 2);
                 continue;

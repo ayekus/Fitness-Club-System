@@ -73,8 +73,9 @@ public class Main {
         ResultSet rs = stmt.executeQuery();
 
         if (rs.next()) {
-            System.out.println("Logging in.\nWelcome " + rs.getString("first_name") + "\n");
+            System.out.println("\nLogging in.\nWelcome " + rs.getString("first_name") + "\n");
             Member.main(rs.getInt("member_id"), conn, scanner);
+
         } else {
             System.out.print("Invalid email and password combination, ");
             return;
@@ -97,7 +98,7 @@ public class Main {
         ResultSet rs = stmt.executeQuery();
 
         if (rs.next()) {
-            System.out.println("Logging in.\nWelcome Trainer " + rs.getString("first_name") + "\n");
+            System.out.println("\nLogging in.\nWelcome Trainer " + rs.getString("first_name") + "\n");
             Trainer.main(rs.getInt("trainer_id"), conn, scanner);
         } else {
             System.out.print("Invalid email and password combination, ");
@@ -121,7 +122,7 @@ public class Main {
         ResultSet rs = stmt.executeQuery();
 
         if (rs.next()) {
-            System.out.println("Logging in.\nWelcome Admin " + rs.getString("first_name") + "\n");
+            System.out.println("\nLogging in.\nWelcome Admin " + rs.getString("first_name") + "\n");
             Admin.main(rs.getInt("admin_id"), conn, scanner);
         } else {
             System.out.print("Invalid email and password combination, ");
