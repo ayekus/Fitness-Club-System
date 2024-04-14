@@ -21,9 +21,10 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("Welcome to the Fitness Club");
+
         while(true) {
             System.out.println("""
-                    Welcome to the Fitness Club
                     Please select an option:
                        1. Existing Member Sign-In
                        2. Trainer Sign-in

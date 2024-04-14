@@ -143,7 +143,21 @@ public class Admin {
     private static void updateSchedule(int adminId, Connection conn, Scanner scanner) {
     }
 
-    private static void billing(int adminId, Connection conn, Scanner scanner) {
+    private static void billing(int adminId, Connection conn, Scanner scanner) throws SQLException {
+        String query = "SELECT * FROM Payments";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("Payment ID | Member ID | Amount |      Description      | Payment Date");
+
+        while (rs.next()) {
+            System.out.printf("%-10d | %-9d | %-6.2f | %-21s | %s\n",
+                    rs.getInt("payment_id"), rs.getInt("member_id"), rs.getDouble("amount"),
+                    rs.getString("payment_desc"), rs.getDate("payment_date"));
+        }
+
+        rs.close();
+        stmt.close();
 
     }
 

@@ -55,11 +55,14 @@ public class Member {
         stmt.setInt(1, memberId);
         ResultSet rs = stmt.executeQuery();
 
+
         System.out.println("\nHere is your current Schedule: ");
         System.out.println("One-on-One Sessions:");
+        boolean temp = false;
         boolean enrolled = false;
 
         while (rs.next()) {
+            temp = true;
             enrolled = true;
             System.out.println(rs.getString("session_name") + " session on " +
                     rs.getDate("session_date") + " from " + rs.getTime("start_time") + " to "
@@ -68,7 +71,7 @@ public class Member {
                     + rs.getString("trainer_last_name"));
         }
 
-        if (!enrolled) {
+        if (!temp) {
             System.out.println("You are not enrolled in any upcoming One-on-One Sessions.");
         }
 
@@ -88,8 +91,9 @@ public class Member {
         ResultSet rs2 = stmt2.executeQuery();
 
         System.out.println("\nGroup Sessions:");
-        enrolled = false;
+        temp = false;
         while (rs2.next()) {
+            temp = true;
             enrolled = true;
             System.out.println(rs2.getString("session_name") + " session on " +
                     rs2.getDate("session_date") + " from " + rs2.getTime("start_time") + " to "
@@ -97,7 +101,7 @@ public class Member {
                     rs2.getString("trainer_first_name") + " "
                     + rs2.getString("trainer_last_name"));
         }
-        if (!enrolled) {
+        if (!temp) {
             System.out.println("You are not enrolled in any upcoming Group Sessions.\n");
         }
 
@@ -150,6 +154,7 @@ public class Member {
             bookingDate = LocalDate.parse(bookingDateStr);
         } catch (DateTimeParseException e) {
             System.out.println("Invalid date format entered. ");
+            viewSchedule(memberId, conn, scanner);
             return;
         }
 
@@ -163,14 +168,22 @@ public class Member {
         System.out.println("\nAvailable Sessions:\n");
         boolean hasSessions = false;
         while (rs.next()) {
+            String name = rs.getString("session_name");
             hasSessions = true;
             System.out.println("Availability ID: " + rs.getInt("availability_id"));
+
+            if (name != null) {
+                System.out.println(name);
+            }
+
             System.out.println("Trainer: " + rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name"));
             System.out.println("Start Time: " + rs.getTime("start_time") + " - End Time: " + rs.getTime("end_time") +
                     " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
         }
+
         if (!hasSessions) {
             System.out.println("There are no available sessions.\n");
+            viewSchedule(memberId, conn, scanner);
             return;
         }
 
@@ -189,14 +202,9 @@ public class Member {
 
         if (!selectedRs.next()) {
             System.out.println("Invalid availability ID.");
+            viewSchedule(memberId, conn, scanner);
             return;
         }
-
-        if (!Main.processPayment(conn, scanner, 10, memberId, "Session Sign-up Fee")) {
-            System.out.println("Payment failed. Please try again. ");
-            return;
-        }
-
 
         LocalTime startTime = selectedRs.getTime("start_time").toLocalTime();
         LocalTime endTime = selectedRs.getTime("end_time").toLocalTime();
@@ -228,6 +236,7 @@ public class Member {
 
         if (trainingRs.next()) {
             System.out.println("You are already enrolled in a session at this time.");
+            viewSchedule(memberId, conn, scanner);
             return;
         }
 
@@ -243,6 +252,7 @@ public class Member {
 
         if (groupRs.next()) {
             System.out.println("You are already enrolled in a group session at this time.");
+            viewSchedule(memberId, conn, scanner);
             return;
         }
 
@@ -266,8 +276,15 @@ public class Member {
 
             if (oneOnOneRs.next()) {
                 System.out.println("The selected session slot is already booked. Please try again later.");
+                viewSchedule(memberId, conn, scanner);
                 return;
             }
+        }
+
+        if (!Main.processPayment(conn, scanner, 10, memberId, "Session Sign-up Fee")) {
+            System.out.println("Payment failed. Please try again. ");
+            viewSchedule(memberId, conn, scanner);
+            return;
         }
 
         if (!isGroupSession) {
@@ -331,7 +348,7 @@ public class Member {
             }
         }
 
-        // After obtaining the group session ID, enroll the member into the session
+        // After obtaining the group session id, enroll the member into the session
         String enrollGroupSessionQuery = """
                                 INSERT INTO GroupSessionEnrollment (group_session_id, member_id)
                                 VALUES (?, ?)""";
