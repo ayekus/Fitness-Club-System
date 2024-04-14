@@ -18,13 +18,13 @@ public class Admin {
 
             switch (choice) {
                 case "1":
-                    roomManagement(adminId, conn, scanner);
+                    roomManagement(conn, scanner);
                     break;
                 case "2":
                     monitorEquipment(adminId, conn, scanner);
                     break;
                 case "3":
-                    updateSchedule(adminId, conn, scanner);
+                    updateSchedule(conn, scanner);
                     break;
                 case "4":
                     billing(adminId, conn, scanner);
@@ -41,39 +41,107 @@ public class Admin {
         }
     }
 
-    private static void roomManagement(int adminId, Connection conn, Scanner scanner) throws SQLException {
-        String query = """
-            SELECT ta.*, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
-            FROM TrainerAvailability ta
-            INNER JOIN Trainers t ON ta.trainer_id = t.trainer_id""";
+    private static void roomManagement(Connection conn, Scanner scanner) throws SQLException {
+        String query = "SELECT * FROM ApprovedSessions WHERE room_id IS NULL";
         PreparedStatement stmt = conn.prepareStatement(query);
         ResultSet rs = stmt.executeQuery();
 
-        System.out.println("\nSessions Requiring Approval:\n");
+        System.out.println("\nSessions that need a room:\n");
         boolean hasSessions = false;
         while (rs.next()) {
-            String name = rs.getString("session_name");
             hasSessions = true;
-            System.out.println("Availability ID: " + rs.getInt("availability_id"));
+            int sessionId = rs.getInt("session_id");
+            int trainerId = rs.getInt("trainer_id");
+            Time startTime = rs.getTime("start_time");
+            Time endTime = rs.getTime("end_time");
+            Date sessionDate = rs.getDate("session_date");
+            boolean isGroupSession = rs.getBoolean("is_group_session");
+            String sessionName = rs.getString("session_name");
 
-            if (name != null) {
-                System.out.println(name);
-            }
-
-            System.out.println("Trainer: " + rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name"));
-            System.out.println("Start Time: " + rs.getTime("start_time") + " - End Time: " + rs.getTime("end_time") +
-                    " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
+            System.out.println("Session ID: " + sessionId);
+            System.out.println("Trainer ID: " + trainerId);
+            System.out.println("Start Time: " + startTime);
+            System.out.println("End Time: " + endTime);
+            System.out.println("Session Date: " + sessionDate);
+            System.out.println("Is Group Session: " + isGroupSession);
+            System.out.println("Session Name: " + sessionName + "\n");
         }
 
         if (!hasSessions) {
-            System.out.println("There are no available sessions.\n");
+            System.out.println("There are no sessions that need a room.\n");
             return;
         }
 
-        System.out.print("Enter the Availability ID of the session you want to approve: ");
-        int availabilityId = Integer.parseInt(scanner.nextLine().trim());
+        rs.close();
+        stmt.close();
 
+        System.out.print("\nWould you like to assign any rooms (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
 
+        if (choice.equals("y") || choice.equals("yes")) {
+            roomAssignments(conn, scanner);
+            return;
+        }
+
+        System.out.println("Returning back to main menu.\n");
+
+    }
+
+    private static void roomAssignments(Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter the Session Id for the session you would like to add a room for: ");
+        int sessionId;
+        try {
+            sessionId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number entered, please try again.");
+            return;
+        }
+
+        String query = "SELECT * FROM Rooms";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("\nAvailable Rooms:\n");
+        boolean hasRooms = false;
+        while (rs.next()) {
+            hasRooms = true;
+            int roomId = rs.getInt("room_id");
+            String roomDesc = rs.getString("room_desc");
+
+            System.out.println("Room ID: " + roomId);
+            System.out.println(roomDesc + " Room\n");
+        }
+
+        if (!hasRooms) {
+            System.out.println("There are no rooms available.\n");
+            return;
+        }
+
+        rs.close();
+        stmt.close();
+
+        System.out.print("Enter the Room Id for the room you would like to assign: ");
+        int roomId;
+        try {
+            roomId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number entered, please try again.");
+            return;
+        }
+
+        String updateQuery = "UPDATE ApprovedSessions SET room_id = ? WHERE session_id = ?";
+        PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
+        updateStmt.setInt(1, roomId);
+        updateStmt.setInt(2, sessionId);
+        int rowsAffected = updateStmt.executeUpdate();
+
+        if (rowsAffected > 0) {
+            System.out.println("Room assignment successful.");
+        } else {
+            System.out.println("Failed to assign room. Please check the provided session ID and room ID and try again.");
+        }
+
+        updateStmt.close();
 
     }
 
@@ -173,10 +241,100 @@ public class Admin {
     }
 
 
-    private static void updateSchedule(int adminId, Connection conn, Scanner scanner) {
+    private static void updateSchedule(Connection conn, Scanner scanner) throws SQLException {
+        String query = """
+            SELECT ta.*, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
+            FROM TrainerAvailability ta
+            INNER JOIN Trainers t ON ta.trainer_id = t.trainer_id""";
+        PreparedStatement stmt = conn.prepareStatement(query);
+        ResultSet rs = stmt.executeQuery();
+
+        System.out.println("\nSessions Requiring Approval:\n");
+        boolean hasSessions = false;
+        while (rs.next()) {
+            String name = rs.getString("session_name");
+            hasSessions = true;
+            System.out.println("Availability ID: " + rs.getInt("availability_id"));
+
+            if (name != null) {
+                System.out.println(name);
+            }
+
+            System.out.println("Trainer: " + rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name"));
+            System.out.println("Start Time: " + rs.getTime("start_time") + " - End Time: " + rs.getTime("end_time") +
+                    " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
+        }
+
+        if (!hasSessions) {
+            System.out.println("There are no available sessions.\n");
+            return;
+        }
+
+        System.out.print("\nWould you like to approve any sessions (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        if (choice.equals("y") || choice.equals("yes")) {
+            approveSchedule(conn, scanner);
+            return;
+        }
+
+        System.out.println("Returning back to main menu.\n");
     }
 
-    private static void billing(int adminId, Connection conn, Scanner scanner) throws SQLException {
+    private static void approveSchedule(Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter the Availability ID of the session you want to approve: ");
+        int availabilityId;
+        try {
+            availabilityId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number entered, please try again.");
+            return;
+        }
+
+        String selectQuery = "SELECT * FROM TrainerAvailability WHERE availability_id = ?";
+        PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
+        selectStmt.setInt(1, availabilityId);
+        ResultSet rs = selectStmt.executeQuery();
+
+        if (rs.next()) {
+            int trainerId = rs.getInt("trainer_id");
+            Time startTime = rs.getTime("start_time");
+            Time endTime = rs.getTime("end_time");
+            Date sessionDate = rs.getDate("session_date");
+            boolean isGroupSession = rs.getBoolean("is_group_availability");
+            String sessionName = rs.getString("session_name");
+
+            String insertQuery = "INSERT INTO ApprovedSessions (trainer_id, start_time, end_time, session_date, is_group_session, session_name) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
+            insertStmt.setInt(1, trainerId);
+            insertStmt.setTime(2, startTime);
+            insertStmt.setTime(3, endTime);
+            insertStmt.setDate(4, sessionDate);
+            insertStmt.setBoolean(5, isGroupSession);
+            insertStmt.setString(6, sessionName);
+            insertStmt.executeUpdate();
+
+            System.out.println("Session approved and moved to Approved Sessions.");
+
+            insertStmt.close();
+
+            String deleteQuery = "DELETE FROM TrainerAvailability WHERE availability_id = ?";
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery);
+            deleteStmt.setInt(1, availabilityId);
+            deleteStmt.executeUpdate();
+            deleteStmt.close();
+        } else {
+            System.out.println("No session found with Availability ID " + availabilityId);
+            return;
+        }
+
+        rs.close();
+        selectStmt.close();
+    }
+
+
+
+        private static void billing(int adminId, Connection conn, Scanner scanner) throws SQLException {
         String query = "SELECT * FROM Payments";
         PreparedStatement stmt = conn.prepareStatement(query);
         ResultSet rs = stmt.executeQuery();
@@ -201,7 +359,7 @@ public class Admin {
 
         while (approvedRs.next()) {
             System.out.printf("%-19d | %-9d | %-6.2f | %-21s | %-8d | %2s | %s\n",
-                    approvedRs.getInt("approved_payment_id"), approvedRs.getInt("member_id"), approvedRs.getDouble("amount"),
+                    approvedRs.getInt("approved_payment_id"), approvedRs.getInt("member_id"), approvedRs.getDouble("approved_amount"),
                     approvedRs.getString("payment_desc"), approvedRs.getInt("admin_id"), approvedRs.getDate("payment_date"),
                     approvedRs.getDate("date_approved"));
         }
@@ -241,7 +399,7 @@ public class Admin {
             String description = rs.getString("payment_desc");
             Date paymentDate = rs.getDate("payment_date");
 
-            String insertQuery = "INSERT INTO ApprovedPayments (member_id, amount, payment_desc, admin_id, payment_date) VALUES (?, ?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO ApprovedPayments (member_id, approved_amount, payment_desc, admin_id, payment_date) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
             insertStmt.setInt(1, memberId);
             insertStmt.setDouble(2, amount);

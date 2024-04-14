@@ -112,7 +112,7 @@ CREATE TABLE Payments (
 CREATE TABLE ApprovedPayments (
     approved_payment_id SERIAL PRIMARY KEY,
     member_id INTEGER NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
+    approved_amount DECIMAL(10, 2) NOT NULL,
     payment_desc VARCHAR(255),
     admin_id INTEGER NOT NULL,
     payment_date DATE NOT NULL,
