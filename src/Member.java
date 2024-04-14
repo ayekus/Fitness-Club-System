@@ -1,12 +1,9 @@
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import java.util.Properties;
 import java.util.Scanner;
 
 public class Member {
@@ -58,11 +55,9 @@ public class Member {
 
         System.out.println("\nHere is your current Schedule: ");
         System.out.println("One-on-One Sessions:");
-        boolean temp = false;
         boolean enrolled = false;
 
         while (rs.next()) {
-            temp = true;
             enrolled = true;
             System.out.println(rs.getString("session_name") + " session on " +
                     rs.getDate("session_date") + " from " + rs.getTime("start_time") + " to "
@@ -71,10 +66,9 @@ public class Member {
                     + rs.getString("trainer_last_name"));
         }
 
-        if (!temp) {
+        if (!enrolled) {
             System.out.println("You are not enrolled in any upcoming One-on-One Sessions.");
         }
-
 
         stmt.close();
         rs.close();
@@ -91,9 +85,8 @@ public class Member {
         ResultSet rs2 = stmt2.executeQuery();
 
         System.out.println("\nGroup Sessions:");
-        temp = false;
+        enrolled = false;
         while (rs2.next()) {
-            temp = true;
             enrolled = true;
             System.out.println(rs2.getString("session_name") + " session on " +
                     rs2.getDate("session_date") + " from " + rs2.getTime("start_time") + " to "
@@ -101,7 +94,7 @@ public class Member {
                     rs2.getString("trainer_first_name") + " "
                     + rs2.getString("trainer_last_name"));
         }
-        if (!temp) {
+        if (!enrolled) {
             System.out.println("You are not enrolled in any upcoming Group Sessions.\n");
         }
 
@@ -109,37 +102,11 @@ public class Member {
         stmt2.close();
 
 
-        System.out.print("\nWould you like to add or remove a session (y/n): ");
+        System.out.print("\nWould you like to add a session (y/n): ");
         String choice = scanner.nextLine().trim().toLowerCase();
 
         if (choice.equals("y") || choice.equals("yes")) {
-            while (true) {
-                System.out.println("""
-                    Please select an option:
-                       1. Add a session
-                       2. Remove a session""");
-                System.out.print("Enter your choice: ");
-
-                choice = scanner.nextLine().trim();
-
-                switch (choice) {
-                    case "1":
-                        addSession(memberId, conn, scanner);
-                        return;
-                    case "2":
-                        if (!enrolled) {
-                            System.out.println("You are not enrolled in any sessions.\n");
-                            viewSchedule(memberId, conn, scanner);
-                            return;
-                        }
-
-                        removeSession(memberId, conn, scanner);
-                        return;
-                    default:
-                        System.out.println("Invalid choice, please try again.\n");
-                        break;
-                }
-            }
+            addSession(memberId, conn, scanner);
         }
 
         System.out.println("Returning back to main menu.\n");
@@ -159,26 +126,22 @@ public class Member {
         }
 
         String query = """
-            SELECT ta.*, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
-            FROM TrainerAvailability ta
-            INNER JOIN Trainers t ON ta.trainer_id = t.trainer_id""";
+                SELECT ap.*, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name, r.room_desc
+                FROM ApprovedSessions AS ap
+                INNER JOIN Trainers AS t ON ap.trainer_id = t.trainer_id
+                LEFT JOIN Rooms AS r ON ap.room_id = r.room_id""";
         PreparedStatement stmt = conn.prepareStatement(query);
         ResultSet rs = stmt.executeQuery();
 
         System.out.println("\nAvailable Sessions:\n");
         boolean hasSessions = false;
         while (rs.next()) {
-            String name = rs.getString("session_name");
             hasSessions = true;
-            System.out.println("Availability ID: " + rs.getInt("availability_id"));
-
-            if (name != null) {
-                System.out.println(name);
-            }
-
+            System.out.println("Session ID: " + rs.getInt("session_id"));
             System.out.println("Trainer: " + rs.getString("trainer_first_name") + " " + rs.getString("trainer_last_name"));
             System.out.println("Start Time: " + rs.getTime("start_time") + " - End Time: " + rs.getTime("end_time") +
-                    " (Type: " + (rs.getBoolean("is_group_availability") ? "Group" : "One-on-One") + ")\n");
+                    " (Type: " + (rs.getBoolean("is_group_session") ? "Group" : "One-on-One"));
+            System.out.println("Room: " + rs.getString("room_desc") + " Room");
         }
 
         if (!hasSessions) {
@@ -187,28 +150,25 @@ public class Member {
             return;
         }
 
-        System.out.print("Enter the Availability ID of the session you want to schedule: ");
-        int availabilityId = Integer.parseInt(scanner.nextLine().trim());
+        System.out.print("Enter the Session ID of the session you want to schedule: ");
+        int sessionId = Integer.parseInt(scanner.nextLine().trim());
 
-        String selectedQuery = """
-                SELECT ta.*, t.first_name AS trainer_first_name, t.last_name AS trainer_last_name
-                FROM TrainerAvailability ta
-                INNER JOIN Trainers t ON ta.trainer_id = t.trainer_id
-                WHERE ta.availability_id = ?""";
+        String selectedQuery = "SELECT * FROM ApprovedSessions WHERE session_id = ?";
 
         PreparedStatement selectedStmt = conn.prepareStatement(selectedQuery);
-        selectedStmt.setInt(1, availabilityId);
+        selectedStmt.setInt(1, sessionId);
         ResultSet selectedRs = selectedStmt.executeQuery();
 
         if (!selectedRs.next()) {
-            System.out.println("Invalid availability ID.");
+            System.out.println("Invalid session ID.");
             viewSchedule(memberId, conn, scanner);
             return;
         }
 
         LocalTime startTime = selectedRs.getTime("start_time").toLocalTime();
         LocalTime endTime = selectedRs.getTime("end_time").toLocalTime();
-        boolean isGroupSession = selectedRs.getBoolean("is_group_availability");
+        boolean isGroupSession = selectedRs.getBoolean("is_group_session");
+        int room_id = selectedRs.getInt("room_id");
 
         // Check if user is already enrolled for a session at the same time
         String trainingSessionQuery = """
@@ -292,8 +252,8 @@ public class Member {
             String sessionName = scanner.nextLine().trim();
 
             String insertTrainingSessionQuery = """
-                    INSERT INTO TrainingSession (member_id, trainer_id, session_date, start_time, end_time, session_name)
-                    VALUES (?, ?, ?, ?, ?, ?)""";
+                    INSERT INTO TrainingSession (member_id, trainer_id, session_date, start_time, end_time, session_name, room_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)""";
 
             PreparedStatement insertTrainingSessionStmt = conn.prepareStatement(insertTrainingSessionQuery);
             insertTrainingSessionStmt.setInt(1, memberId);
@@ -302,6 +262,7 @@ public class Member {
             insertTrainingSessionStmt.setTime(4, Time.valueOf(startTime));
             insertTrainingSessionStmt.setTime(5, Time.valueOf(endTime));
             insertTrainingSessionStmt.setString(6, sessionName);
+            insertTrainingSessionStmt.setInt(6, room_id);
 
             insertTrainingSessionStmt.executeUpdate();
             System.out.println("Session successfully booked.");
@@ -329,8 +290,8 @@ public class Member {
         } else {
             // If a group session doesn't exist, add it to the GroupSession table
             String insertGroupSessionQuery = """
-                                INSERT INTO GroupSession (session_name, session_date, start_time, end_time, trainer_id)
-                                VALUES (?, ?, ?, ?, ?)""";
+                                INSERT INTO GroupSession (session_name, session_date, start_time, end_time, trainer_id, room_id)
+                                VALUES (?, ?, ?, ?, ?, ?)""";
 
             PreparedStatement insertGroupSessionStmt = conn.prepareStatement(insertGroupSessionQuery, Statement.RETURN_GENERATED_KEYS);
             insertGroupSessionStmt.setString(1, selectedRs.getString("session_name"));
@@ -338,6 +299,7 @@ public class Member {
             insertGroupSessionStmt.setTime(3, Time.valueOf(startTime));
             insertGroupSessionStmt.setTime(4, Time.valueOf(endTime));
             insertGroupSessionStmt.setInt(5, selectedRs.getInt("trainer_id"));
+            insertGroupSessionStmt.setInt(6, room_id);
 
             insertGroupSessionStmt.executeUpdate();
             ResultSet generatedKeys = insertGroupSessionStmt.getGeneratedKeys();
@@ -360,10 +322,6 @@ public class Member {
         enrollGroupSessionStmt.executeUpdate();
         System.out.println("Session successfully booked.");
         viewSchedule(memberId, conn, scanner);
-    }
-
-    public static void removeSession(Integer memberId, Connection conn, Scanner scanner) throws SQLException {
-
     }
 
     public static void viewProfile(Integer memberId, Connection conn, Scanner scanner) throws SQLException, ParseException {
