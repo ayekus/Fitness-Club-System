@@ -61,6 +61,8 @@ CREATE TABLE TrainingSession (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     session_name VARCHAR(255) NOT NULL,
+    room_id INTEGER,
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
     FOREIGN KEY (member_id) REFERENCES Members(member_id),
     FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
 );
@@ -72,7 +74,9 @@ CREATE TABLE GroupSession (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     trainer_id INTEGER NOT NULL,
-    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id)
+    room_id INTEGER,
+    FOREIGN KEY (trainer_id) REFERENCES Trainers(trainer_id),
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
 );
 
 CREATE TABLE GroupSessionEnrollment (
@@ -95,9 +99,16 @@ CREATE TABLE Payments (
 CREATE TABLE ApprovedPayments (
     approved_payment_id SERIAL PRIMARY KEY,
     member_id INTEGER NOT NULL,
-    payment_date DATE NOT NULL,
-    admin_id INTEGER NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
     payment_desc VARCHAR(255),
+    admin_id INTEGER NOT NULL,
+    payment_date DATE NOT NULL,
     date_approved DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (member_id) REFERENCES Members(member_id),
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
+);
+
+CREATE TABLE Rooms (
+    room_id SERIAL PRIMARY KEY,
+    room_desc VARCHAR(255)
 );

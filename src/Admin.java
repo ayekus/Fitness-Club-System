@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class Admin {
 
     public static void main(int adminId, Connection conn, Scanner scanner) throws SQLException {
-        while(true) {
+        while (true) {
             System.out.println("""
                     Please select an option:
                        1. Room Booking Management
@@ -76,9 +76,9 @@ public class Admin {
         if (choice.equals("y") || choice.equals("yes")) {
             while (true) {
                 System.out.println("""
-                    Please select an option:
-                       1. Add Maintenance Equipment
-                       2. Repair Equipment""");
+                        Please select an option:
+                           1. Add Maintenance Equipment
+                           2. Repair Equipment""");
                 System.out.print("Enter your choice: ");
 
                 choice = scanner.nextLine().trim();
@@ -147,7 +147,7 @@ public class Admin {
         String query = "SELECT * FROM Payments";
         PreparedStatement stmt = conn.prepareStatement(query);
         ResultSet rs = stmt.executeQuery();
-
+        System.out.println("\nUnapproved payments: ");
         System.out.println("Payment ID | Member ID | Amount |      Description      | Payment Date");
 
         while (rs.next()) {
@@ -159,6 +159,79 @@ public class Admin {
         rs.close();
         stmt.close();
 
+        System.out.println("\nApproved payments: ");
+        System.out.println("Approved Payment ID | Member ID | Amount |      Description      | Admin ID | Payment Date | Date Approved");
+
+        String approvedQuery = "SELECT * FROM ApprovedPayments";
+        PreparedStatement approvedStmt = conn.prepareStatement(approvedQuery);
+        ResultSet approvedRs = approvedStmt.executeQuery();
+
+        while (approvedRs.next()) {
+            System.out.printf("%-19d | %-9d | %-6.2f | %-21s | %-8d | %2s | %s\n",
+                    approvedRs.getInt("approved_payment_id"), approvedRs.getInt("member_id"), approvedRs.getDouble("amount"),
+                    approvedRs.getString("payment_desc"), approvedRs.getInt("admin_id"), approvedRs.getDate("payment_date"),
+                    approvedRs.getDate("date_approved"));
+        }
+
+        approvedRs.close();
+        approvedStmt.close();
+
+        System.out.print("\nWould you like to approve any transactions (y/n): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        if (choice.equals("y") || choice.equals("yes")) {
+            updateBilling(adminId, conn, scanner);
+            return;
+        }
+
+        System.out.println("Returning back to main menu.\n");
     }
 
+    private static void updateBilling(int adminId, Connection conn, Scanner scanner) throws SQLException {
+        System.out.print("Enter the Payment ID of the transaction you would like to approve: ");
+        int paymentId;
+        try {
+            paymentId = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number entered, please try again.");
+            return;
+        }
+
+        String selectQuery = "SELECT * FROM Payments WHERE payment_id = ?";
+        PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
+        selectStmt.setInt(1, paymentId);
+        ResultSet rs = selectStmt.executeQuery();
+
+        if (rs.next()) {
+            int memberId = rs.getInt("member_id");
+            double amount = rs.getDouble("amount");
+            String description = rs.getString("payment_desc");
+            Date paymentDate = rs.getDate("payment_date");
+
+            String insertQuery = "INSERT INTO ApprovedPayments (member_id, amount, payment_desc, admin_id, payment_date) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
+            insertStmt.setInt(1, memberId);
+            insertStmt.setDouble(2, amount);
+            insertStmt.setString(3, description);
+            insertStmt.setInt(4, adminId);
+            insertStmt.setDate(5, paymentDate);
+            insertStmt.executeUpdate();
+
+            String deleteQuery = "DELETE FROM Payments WHERE payment_id = ?";
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery);
+            deleteStmt.setInt(1, paymentId);
+            deleteStmt.executeUpdate();
+
+            System.out.println("Payment approved and moved to Approved Payments Records.");
+            insertStmt.close();
+            deleteStmt.close();
+        } else {
+            System.out.println("No payment found with Payment ID " + paymentId);
+            return;
+        }
+
+        rs.close();
+        selectStmt.close();
+        billing(adminId, conn, scanner);
+    }
 }
