@@ -147,7 +147,10 @@ public class Trainer {
     }
 
     public static void displaySchedule(int trainerId, Connection conn) throws SQLException {
-        String trainingQuery = "SELECT * FROM TrainingSession WHERE trainer_id = ?";
+        String trainingQuery = "SELECT ts.session_name, ts.session_date, ts.start_time, ts.end_time, r.room_desc " +
+                "FROM TrainingSession ts " +
+                "INNER JOIN Rooms r ON ts.room_id = r.room_id " +
+                "WHERE ts.trainer_id = ?";
         PreparedStatement trainingStmt = conn.prepareStatement(trainingQuery);
         trainingStmt.setInt(1, trainerId);
         ResultSet trainingRs = trainingStmt.executeQuery();
@@ -158,11 +161,14 @@ public class Trainer {
             System.out.println("Session Date: " + trainingRs.getDate("session_date"));
             System.out.println("Start Time: " + trainingRs.getTime("start_time"));
             System.out.println("End Time: " + trainingRs.getTime("end_time"));
-            System.out.println("Room ID: " + trainingRs.getInt("room_id"));
+            System.out.println("Room Name: " + trainingRs.getString("room_desc") + " Room");
             System.out.println();
         }
 
-        String groupQuery = "SELECT * FROM GroupSession WHERE trainer_id = ?";
+        String groupQuery = "SELECT gs.session_name, gs.session_date, gs.start_time, gs.end_time, r.room_desc " +
+                "FROM GroupSession gs " +
+                "INNER JOIN Rooms r ON gs.room_id = r.room_id " +
+                "WHERE gs.trainer_id = ?";
         PreparedStatement groupStmt = conn.prepareStatement(groupQuery);
         groupStmt.setInt(1, trainerId);
         ResultSet groupRs = groupStmt.executeQuery();
@@ -173,7 +179,7 @@ public class Trainer {
             System.out.println("Session Date: " + groupRs.getDate("session_date"));
             System.out.println("Start Time: " + groupRs.getTime("start_time"));
             System.out.println("End Time: " + groupRs.getTime("end_time"));
-            System.out.println("Room ID: " + groupRs.getInt("room_id"));
+            System.out.println("Room Name: " + groupRs.getString("room_desc") + " Room");
             System.out.println();
         }
 
