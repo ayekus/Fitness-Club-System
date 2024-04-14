@@ -28,3 +28,15 @@ INSERT INTO Rooms (room_desc) VALUES
 ('Bike'),
 ('Boxing'),
 ('Group Fitness');
+
+INSERT INTO ApprovedSessions (trainer_id, start_time, end_time, is_group_session, session_name, room_id) VALUES (1, '10:00:00', '11:00:00', FALSE, 'Yoga Basics', 1);
+
+INSERT INTO TrainingSession (member_id, trainer_id, session_date, start_time, end_time, session_name, room_id) VALUES (1, 1, '2024-04-10', '09:00:00', '10:00:00', 'Personal Training', 1);
+
+INSERT INTO GroupSession (session_name, session_date, start_time, end_time, trainer_id, room_id) VALUES ('Advanced Spin Class', '2024-04-12', '18:00:00', '19:00:00', 1, 1);
+
+INSERT INTO GroupSessionEnrollment (group_session_id, member_id) VALUES (1, 1);
+
+INSERT INTO Payments (member_id, amount, payment_desc) VALUES (1, 59.99, 'Monthly Gym Membership');
+
+INSERT INTO ApprovedPayments (member_id, approved_amount, payment_desc, admin_id, payment_date) VALUES (1, 59.99, 'Monthly Membership Approved', 1, '2024-04-10');
