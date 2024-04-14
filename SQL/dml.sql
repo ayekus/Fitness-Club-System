@@ -20,7 +20,7 @@ INSERT INTO Admin (first_name, last_name, email, password, phone, date_of_birth)
 INSERT INTO EquipmentMaintenance (equipment_name, admin_id) VALUES
 ('Treadmill', 1),
 ('Elliptical Machine', 2),
-('Stationary Bike', 3),
+('Stationary Bike', 3);
 
 INSERT INTO Rooms (room_desc) VALUES
 ('Gym'),

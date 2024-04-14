@@ -14,6 +14,11 @@ CREATE TABLE Members (
     health_stats VARCHAR(255)
 );
 
+CREATE TABLE Rooms (
+    room_id SERIAL PRIMARY KEY,
+    room_desc VARCHAR(255)
+);
+
 CREATE TABLE Trainers (
     trainer_id SERIAL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
@@ -58,7 +63,6 @@ CREATE TABLE ApprovedSessions (
     trainer_id INTEGER NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    session_date DATE NOT NULL,
     is_group_session BOOLEAN NOT NULL,
     session_name VARCHAR(255) NOT NULL,
     room_id INTEGER,
@@ -119,9 +123,4 @@ CREATE TABLE ApprovedPayments (
     date_approved DATE DEFAULT CURRENT_DATE,
     FOREIGN KEY (member_id) REFERENCES Members(member_id),
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
-);
-
-CREATE TABLE Rooms (
-    room_id SERIAL PRIMARY KEY,
-    room_desc VARCHAR(255)
 );

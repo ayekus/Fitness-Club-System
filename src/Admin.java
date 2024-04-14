@@ -54,7 +54,6 @@ public class Admin {
             int trainerId = rs.getInt("trainer_id");
             Time startTime = rs.getTime("start_time");
             Time endTime = rs.getTime("end_time");
-            Date sessionDate = rs.getDate("session_date");
             boolean isGroupSession = rs.getBoolean("is_group_session");
             String sessionName = rs.getString("session_name");
 
@@ -62,7 +61,6 @@ public class Admin {
             System.out.println("Trainer ID: " + trainerId);
             System.out.println("Start Time: " + startTime);
             System.out.println("End Time: " + endTime);
-            System.out.println("Session Date: " + sessionDate);
             System.out.println("Is Group Session: " + isGroupSession);
             System.out.println("Session Name: " + sessionName + "\n");
         }
@@ -300,18 +298,16 @@ public class Admin {
             int trainerId = rs.getInt("trainer_id");
             Time startTime = rs.getTime("start_time");
             Time endTime = rs.getTime("end_time");
-            Date sessionDate = rs.getDate("session_date");
             boolean isGroupSession = rs.getBoolean("is_group_availability");
             String sessionName = rs.getString("session_name");
 
-            String insertQuery = "INSERT INTO ApprovedSessions (trainer_id, start_time, end_time, session_date, is_group_session, session_name) VALUES (?, ?, ?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO ApprovedSessions (trainer_id, start_time, end_time, is_group_session, session_name) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
             insertStmt.setInt(1, trainerId);
             insertStmt.setTime(2, startTime);
             insertStmt.setTime(3, endTime);
-            insertStmt.setDate(4, sessionDate);
-            insertStmt.setBoolean(5, isGroupSession);
-            insertStmt.setString(6, sessionName);
+            insertStmt.setBoolean(4, isGroupSession);
+            insertStmt.setString(5, sessionName);
             insertStmt.executeUpdate();
 
             System.out.println("Session approved and moved to Approved Sessions.");
