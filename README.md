@@ -13,7 +13,7 @@ DB_USER=username
 DB_PASSWORD=password
 DB_URL=jdbc:postgresql://localhost:5432/database_name
 
-and rename the file to config.properties (in configPropertiesExample.properties file)
+and rename the file to config.properties (in the configPropertiesExample.properties file)
 
 ## Run the Main.java file:
 
@@ -21,8 +21,4 @@ and rename the file to config.properties (in configPropertiesExample.properties 
 
 ## YouTube Video Tutorial:
 
-To watch my video demonstration, you can watch it [here](https://youtu.be/_0POj5r1UyY).
-
-## Report:
-
-Report submitted in brightspace
+To watch my video demonstration, you can watch it [here]([https://youtu.be/_0POj5r1UyY](https://youtu.be/jSOwwt1U59A)).
